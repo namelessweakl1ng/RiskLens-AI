@@ -40,3 +40,16 @@ models/
 # OS files
 .DS_Store
 Thumbs.dbuploads/ 
+
+# Reproducible downloaded data, local annotations and generated ML artifacts
+training_pipeline/data/external/
+training_pipeline/data/raw/
+training_pipeline/data/interim/
+training_pipeline/data/processed/
+training_pipeline/artifacts/
+training_pipeline/models/
+.superpowers/
+.pytest_cache/
+.ruff_cache/
+coverage.xml
+htmlcov/

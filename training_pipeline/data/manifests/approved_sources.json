@@ -1,0 +1,26 @@
+[
+  {
+    "source_id": "cfpb_agreements",
+    "source_type": "public_real",
+    "source_organization": "Consumer Financial Protection Bureau",
+    "hostnames": ["consumerfinance.gov", "www.consumerfinance.gov", "files.consumerfinance.gov"]
+  },
+  {
+    "source_id": "sec_edgar",
+    "source_type": "public_real",
+    "source_organization": "U.S. Securities and Exchange Commission",
+    "hostnames": ["sec.gov", "www.sec.gov"]
+  },
+  {
+    "source_id": "irdai_policy_wordings",
+    "source_type": "public_real",
+    "source_organization": "Insurance Regulatory and Development Authority of India",
+    "hostnames": ["irdai.gov.in", "www.irdai.gov.in"]
+  },
+  {
+    "source_id": "cuad_atticus",
+    "source_type": "public_real",
+    "source_organization": "The Atticus Project",
+    "hostnames": ["github.com", "raw.githubusercontent.com"]
+  }
+]

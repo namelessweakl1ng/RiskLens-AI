@@ -1,11 +1,10 @@
-fastapi
-uvicorn[standard]
-python-multipart
-pymupdf
-transformers[torch]
-accelerate
-sqlalchemy
-
-
-pip install -r requirements.txt
-uvicorn backend.main:app --reloadx
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30,<1
+python-multipart>=0.0.18,<1
+pymupdf>=1.24,<2
+transformers>=4.46,<6
+torch>=2.5,<3
+accelerate>=1.1,<2
+numpy>=1.26,<3
+scikit-learn>=1.5,<2
+matplotlib>=3.9,<4
