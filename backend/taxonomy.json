@@ -1,0 +1,156 @@
+{
+  "hidden_charges": {
+    "display_name": "Hidden Charges",
+    "description": "Additional charges may increase your total cost.",
+    "default_severity": "high",
+    "scoring_weight": 1.0,
+    "aliases": [
+      "Hidden Charges",
+      "hidden charge"
+    ],
+    "rule_patterns": [
+      "\\b(?:processing|administrative|service|documentation|additional|hidden) (?:fee|fees|charge|charges)\\b",
+      "\\bnon[- ]refundable (?:fee|charge)\\b"
+    ],
+    "explanation_template": "Additional charges may increase your total cost.",
+    "recommendation_template": "Ask for a complete schedule of charges and refund conditions."
+  },
+  "high_interest": {
+    "display_name": "High Interest",
+    "description": "The interest terms may expose you to increased borrowing costs.",
+    "default_severity": "high",
+    "scoring_weight": 1.0,
+    "aliases": [
+      "High Interest Risk",
+      "High Interest",
+      "interest"
+    ],
+    "rule_patterns": [
+      "\\b(?:high|variable|floating|revisable) (?:annual )?interest (?:rate|rates)\\b",
+      "\\binterest rate (?:may|shall|will|can) (?:vary|increase|be (?:revised|changed))\\b",
+      "\\bAPR (?:may|will|shall) vary\\b"
+    ],
+    "explanation_template": "The interest terms may expose you to increased borrowing costs.",
+    "recommendation_template": "Confirm the APR, reset mechanism, caps and total repayment cost."
+  },
+  "penalty_clause": {
+    "display_name": "Penalties",
+    "description": "A stated penalty may increase costs following specified events.",
+    "default_severity": "high",
+    "scoring_weight": 1.0,
+    "aliases": [
+      "Penalty Clause",
+      "penalty"
+    ],
+    "rule_patterns": [
+      "\\b(?:late payment|prepayment|default|early repayment) penalt(?:y|ies)\\b",
+      "\\b(?:penal interest|late fee|default charge|penalty charge)\\b"
+    ],
+    "explanation_template": "A stated penalty may increase costs following specified events.",
+    "recommendation_template": "Confirm penalty amounts, triggers, grace periods and any waiver rights."
+  },
+  "foreclosure": {
+    "display_name": "Foreclosure / Collateral Risk",
+    "description": "The clause provides for enforcement against property or collateral.",
+    "default_severity": "critical",
+    "scoring_weight": 1.0,
+    "aliases": [
+      "Foreclosure Risk"
+    ],
+    "rule_patterns": [
+      "\\b(?:repossess|repossession|seizure of|foreclos(?:e|ure))\\b",
+      "\\b(?:collateral|security|property) (?:may|shall|will|can) be (?:sold|enforced|repossessed)\\b"
+    ],
+    "explanation_template": "The clause provides for enforcement against property or collateral.",
+    "recommendation_template": "Review default triggers, notice requirements and opportunities to cure."
+  },
+  "automatic_renewal": {
+    "display_name": "Automatic Renewal",
+    "description": "The agreement may continue automatically unless you act.",
+    "default_severity": "medium",
+    "scoring_weight": 0.65,
+    "aliases": [
+      "Automatic Renewal",
+      "auto renewal"
+    ],
+    "rule_patterns": [
+      "\\b(?:automatically renew(?:s|ed)?|automatic renewal|auto[- ]renewal)\\b"
+    ],
+    "explanation_template": "The agreement may continue automatically unless you act.",
+    "recommendation_template": "Confirm renewal dates, notice windows and cancellation methods."
+  },
+  "coverage_exclusion": {
+    "display_name": "Coverage Exclusion",
+    "description": "A coverage restriction may limit benefits for the stated circumstances.",
+    "default_severity": "high",
+    "scoring_weight": 1.0,
+    "aliases": [
+      "Coverage Exclusion",
+      "exclusion"
+    ],
+    "rule_patterns": [
+      "\\b(?:excluded from coverage|not covered|coverage (?:excludes|does not cover)|will not cover|policy excludes)\\b",
+      "\\b(?:exclude[sd]?|exclusion of) (?:hospital|treatment|claims?|illness|damage)\\b"
+    ],
+    "explanation_template": "A coverage restriction may limit benefits for the stated circumstances.",
+    "recommendation_template": "Check the excluded circumstances against the cover you need."
+  },
+  "waiting_period": {
+    "display_name": "Waiting Period",
+    "description": "Benefits may be unavailable until a specified waiting period expires.",
+    "default_severity": "medium",
+    "scoring_weight": 0.65,
+    "aliases": [
+      "Waiting Period",
+      "waiting time"
+    ],
+    "rule_patterns": [
+      "\\bwaiting (?:period|time)\\b"
+    ],
+    "explanation_template": "Benefits may be unavailable until a specified waiting period expires.",
+    "recommendation_template": "Confirm the duration, affected benefits and any exceptions."
+  },
+  "unilateral_change": {
+    "display_name": "Unilateral Change",
+    "description": "One party may be able to change material terms or exercise unilateral discretion.",
+    "default_severity": "high",
+    "scoring_weight": 1.0,
+    "aliases": [
+      "Unilateral Change"
+    ],
+    "rule_patterns": [
+      "\\b(?:may|can|shall|will) (?:change|modify|revise) (?:the )?(?:terms|premium|fees|rates)\\b",
+      "\\b(?:sole discretion|without (?:prior )?notice)\\b"
+    ],
+    "explanation_template": "One party may be able to change material terms or exercise unilateral discretion.",
+    "recommendation_template": "Ask for advance notice, objective limits and a right to exit."
+  },
+  "other_risk": {
+    "display_name": "Other Material Risk",
+    "description": "The clause contains another material restriction or obligation.",
+    "default_severity": "medium",
+    "scoring_weight": 0.65,
+    "aliases": [
+      "other risk"
+    ],
+    "rule_patterns": [
+      "\\bunlimited liability\\b",
+      "\\bwaiv(?:e|es|er of) (?:all )?(?:legal rights|right to appeal)\\b"
+    ],
+    "explanation_template": "The clause contains another material restriction or obligation.",
+    "recommendation_template": "Have a qualified reviewer assess the obligation and negotiate limits."
+  },
+  "no_risk": {
+    "display_name": "Safe Clause",
+    "description": "No configured material-risk evidence was detected; this is not a guarantee of safety.",
+    "default_severity": "low",
+    "scoring_weight": 0,
+    "aliases": [
+      "No Risk",
+      "safe"
+    ],
+    "rule_patterns": [],
+    "explanation_template": "No configured material-risk evidence was detected; this is not a guarantee of safety.",
+    "recommendation_template": "Verify the original agreement and terms relevant to your circumstances."
+  }
+}

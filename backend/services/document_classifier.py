@@ -1,127 +1,22 @@
-def classify_document(text):
+"""Transparent document classification; heuristic strength is not ML confidence."""
+import re
+from backend.schemas import DocumentClassification
 
-    # Convert text to lowercase
-    text = text.lower()
+SIGNALS = {
+    'credit_card': ['credit card', 'cardholder', 'cash advance', 'credit limit'],
+    'insurance': ['insurance', 'policyholder', 'sum insured', 'coverage', 'premium', 'insurer'],
+    'loan': ['loan agreement', 'borrower', 'lender', 'repayment', 'principal amount', 'emi'],
+    'investment': ['investment', 'shareholder', 'equity', 'shares', 'securities'],
+    'lease': ['lease', 'tenant', 'landlord', 'monthly rent'],
+    'other_financial': ['financial agreement', 'bank account', 'deposit account'],
+}
 
-    # -----------------------------------------
-    # FINANCIAL / LOAN KEYWORDS
-    # -----------------------------------------
 
-    financial_keywords = [
-
-        "loan agreement",
-        "borrower",
-        "lender",
-        "interest rate",
-        "emi",
-        "equated monthly installment",
-        "repayment",
-        "principal amount",
-        "processing fee",
-        "late payment",
-        "default",
-        "credit facility",
-        "loan tenure"
-
-    ]
-
-    # -----------------------------------------
-    # INSURANCE KEYWORDS
-    # -----------------------------------------
-
-    insurance_keywords = [
-
-        "insurance policy",
-        "policyholder",
-        "insured",
-        "premium",
-        "sum insured",
-        "coverage",
-        "claim",
-        "waiting period",
-        "pre-existing disease",
-        "exclusions",
-        "policy term",
-        "deductible"
-
-    ]
-
-    # -----------------------------------------
-    # COUNT FINANCIAL KEYWORDS
-    # -----------------------------------------
-
-    financial_score = 0
-
-    for keyword in financial_keywords:
-
-        if keyword in text:
-            financial_score += 1
-
-    # -----------------------------------------
-    # COUNT INSURANCE KEYWORDS
-    # -----------------------------------------
-
-    insurance_score = 0
-
-    for keyword in insurance_keywords:
-
-        if keyword in text:
-            insurance_score += 1
-
-    # -----------------------------------------
-    # CLASSIFICATION
-    # -----------------------------------------
-
-    if financial_score == 0 and insurance_score == 0:
-
-        document_type = "UNKNOWN"
-
-    elif financial_score > insurance_score:
-
-        document_type = "FINANCIAL_CONTRACT"
-
-    elif insurance_score > financial_score:
-
-        document_type = "INSURANCE_POLICY"
-
-    else:
-
-        document_type = "MIXED_DOCUMENT"
-
-    # -----------------------------------------
-    # CONFIDENCE CALCULATION
-    # -----------------------------------------
-
-    total_score = financial_score + insurance_score
-
-    if total_score == 0:
-
-        confidence = 0
-
-    else:
-
-        highest_score = max(
-            financial_score,
-            insurance_score
-        )
-
-        confidence = round(
-            (highest_score / total_score) * 100,
-            2
-        )
-
-    # -----------------------------------------
-    # RETURN RESULT
-    # -----------------------------------------
-
-    return {
-
-        "document_type": document_type,
-
-        "confidence": confidence,
-
-        "financial_keyword_score": financial_score,
-
-        "insurance_keyword_score": insurance_score
-
-    }
+def classify_document(text: str) -> DocumentClassification:
+    evidence = {kind: [word for word in words if re.search(r'\b'+re.escape(word)+r'\b', text, re.I)] for kind, words in SIGNALS.items()}
+    kind = max(evidence, key=lambda key: len(evidence[key]))
+    matches = evidence[kind]
+    if not matches:
+        return DocumentClassification()
+    total = sum(len(v) for v in evidence.values())
+    return DocumentClassification(document_type=kind, classification_strength=round(len(matches)/total, 3), evidence=matches)
