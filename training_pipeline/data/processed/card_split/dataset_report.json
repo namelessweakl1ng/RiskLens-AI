@@ -1,0 +1,13 @@
+{
+  "counts": {
+    "high_interest": 400,
+    "no_risk": 1867,
+    "hidden_charges": 350,
+    "penalty_clause": 179,
+    "automatic_renewal": 17,
+    "unilateral_change": 44
+  },
+  "train": 2142,
+  "validation": 286,
+  "test": 429
+}

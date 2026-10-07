@@ -1,0 +1,3649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiskLens — Agreement Intelligence</title>
+
+<style>
+/* =========================================================
+   RISK LENS — COMPLETE SELF CONTAINED UI
+   ========================================================= */
+
+:root{
+    --bg:#071525;
+    --bg2:#0b1b2d;
+    --panel:#0e2033;
+    --panel2:#11263c;
+    --border:#1d354d;
+    --border2:#29445e;
+    --text:#f4f8fc;
+    --muted:#91a5ba;
+    --blue:#5b9cff;
+    --blue2:#347df2;
+    --green:#20d39a;
+    --yellow:#f4b740;
+    --red:#ff6675;
+    --purple:#a77cff;
+    --shadow:0 20px 60px rgba(0,0,0,.25);
+}
+
+*{
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    margin:0;
+    min-height:100vh;
+    background:
+        radial-gradient(circle at 70% 0%,rgba(42,111,201,.13),transparent 35%),
+        var(--bg);
+    color:var(--text);
+    font-family:Inter,Arial,sans-serif;
+}
+
+button,
+input{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+.app{
+    display:flex;
+    min-height:100vh;
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar{
+    width:250px;
+    min-width:250px;
+    min-height:100vh;
+    background:#081728;
+    border-right:1px solid var(--border);
+    padding:28px 18px;
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    z-index:50;
+    display:flex;
+    flex-direction:column;
+}
+
+.brand{
+    color:#fff;
+    text-decoration:none;
+    font-size:22px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:0 8px 42px;
+}
+
+.brand-mark{
+    width:34px;
+    height:34px;
+    border-radius:10px;
+    display:grid;
+    place-items:center;
+    background:linear-gradient(135deg,#5c9dff,#2874ef);
+    box-shadow:0 8px 25px rgba(59,130,246,.25);
+    font-weight:800;
+}
+
+.workspace{
+    color:#647d98;
+    font-size:10px;
+    letter-spacing:1.7px;
+    font-weight:700;
+    margin:0 10px 12px;
+}
+
+nav{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+
+.nav{
+    border:0;
+    background:transparent;
+    color:#8fa5bc;
+    padding:12px 13px;
+    border-radius:9px;
+    text-align:left;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    transition:.2s;
+}
+
+.nav:hover{
+    color:#fff;
+    background:#10243a;
+}
+
+.nav.active{
+    color:#fff;
+    background:#16304b;
+    box-shadow:inset 3px 0 0 var(--blue);
+}
+
+.nav-icon{
+    width:20px;
+    text-align:center;
+    color:#73aaff;
+    font-size:16px;
+}
+
+.sidebar-bottom{
+    margin-top:auto;
+}
+
+.profile{
+    border-top:1px solid var(--border);
+    margin-top:18px;
+    padding:20px 5px 4px;
+    display:flex;
+    align-items:center;
+    gap:11px;
+}
+
+.profile-avatar{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:#173453;
+    display:grid;
+    place-items:center;
+    color:#8dbaff;
+    font-weight:700;
+}
+
+.profile strong{
+    display:block;
+    font-size:13px;
+}
+
+.profile small{
+    color:#71879f;
+    display:block;
+    margin-top:3px;
+}
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+main{
+    margin-left:250px;
+    width:calc(100% - 250px);
+    min-width:0;
+}
+
+.topbar{
+    height:74px;
+    border-bottom:1px solid var(--border);
+    background:rgba(7,21,37,.92);
+    backdrop-filter:blur(14px);
+    display:flex;
+    align-items:center;
+    padding:0 34px;
+    position:sticky;
+    top:0;
+    z-index:30;
+}
+
+#breadcrumb{
+    color:#d7e3ef;
+    font-size:14px;
+    font-weight:600;
+}
+
+.top-actions{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.status{
+    font-size:12px;
+    color:#9bb0c4;
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.status b{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 10px var(--green);
+}
+
+.icon-button{
+    width:38px;
+    height:38px;
+    border:1px solid var(--border);
+    background:#0d2034;
+    color:#b9cadb;
+    border-radius:9px;
+}
+
+.mobile-menu{
+    display:none;
+}
+
+/* =========================================================
+   GENERAL
+   ========================================================= */
+
+.view{
+    display:none;
+    padding:48px 52px 80px;
+    max-width:1500px;
+    margin:auto;
+}
+
+.view.active{
+    display:block;
+}
+
+.eyebrow{
+    color:#619cff;
+    font-size:11px;
+    letter-spacing:1.7px;
+    font-weight:800;
+    margin:0 0 10px;
+}
+
+h1{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:52px;
+    line-height:1.04;
+    letter-spacing:-1.7px;
+    margin:0;
+}
+
+h2{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:28px;
+    margin:0;
+}
+
+h3,h4{
+    margin:0;
+}
+
+.lead{
+    color:#94a9bd;
+    line-height:1.7;
+    max-width:650px;
+    font-size:15px;
+}
+
+.primary{
+    border:0;
+    background:linear-gradient(135deg,#5a9cff,#367ff0);
+    color:#fff;
+    padding:13px 19px;
+    border-radius:8px;
+    font-weight:700;
+    box-shadow:0 10px 25px rgba(45,111,231,.2);
+    transition:.2s;
+}
+
+.primary:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.08);
+}
+
+.primary.small{
+    padding:9px 14px;
+    font-size:13px;
+}
+
+.primary.full{
+    width:100%;
+}
+
+.text-button{
+    border:0;
+    background:transparent;
+    color:#72aaff;
+    font-weight:700;
+}
+
+/* =========================================================
+   DASHBOARD HERO
+   ========================================================= */
+
+.page-head{
+    display:grid;
+    grid-template-columns:1.3fr .7fr;
+    gap:35px;
+    align-items:stretch;
+    margin-bottom:65px;
+}
+
+.page-head > div:first-child{
+    padding:35px 0;
+}
+
+.page-head h1 em{
+    color:#72a9ff;
+    font-weight:500;
+}
+
+.hero-card{
+    background:
+        linear-gradient(145deg,rgba(17,44,70,.95),rgba(10,28,47,.95));
+    border:1px solid var(--border2);
+    border-radius:18px;
+    padding:25px;
+    min-height:245px;
+    box-shadow:var(--shadow);
+}
+
+.hero-card-head{
+    color:#a5b9cc;
+    font-size:12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.pulse{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 12px var(--green);
+}
+
+.hero-metric{
+    margin-top:32px;
+    display:flex;
+    align-items:end;
+    gap:10px;
+}
+
+.hero-metric strong{
+    font-size:56px;
+    line-height:1;
+}
+
+.hero-metric span{
+    color:#8197ad;
+    font-size:13px;
+    padding-bottom:6px;
+}
+
+.mini-chart{
+    height:45px;
+    margin-top:25px;
+    display:flex;
+    align-items:end;
+    gap:7px;
+}
+
+.mini-chart i{
+    flex:1;
+    background:linear-gradient(to top,#286fe0,#67a5ff);
+    border-radius:4px 4px 0 0;
+    opacity:.75;
+}
+
+.mini-chart i:nth-child(1){height:25%}
+.mini-chart i:nth-child(2){height:43%}
+.mini-chart i:nth-child(3){height:35%}
+.mini-chart i:nth-child(4){height:65%}
+.mini-chart i:nth-child(5){height:48%}
+.mini-chart i:nth-child(6){height:82%}
+.mini-chart i:nth-child(7){height:100%}
+
+.hero-card > p{
+    color:#667f98;
+    font-size:11px;
+    margin-top:15px;
+}
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+.section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:end;
+    margin-bottom:24px;
+}
+
+.agreement-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+}
+
+.agreement-grid article{
+    min-height:210px;
+    border:1px solid var(--border);
+    background:linear-gradient(145deg,#0e2134,#0b1b2d);
+    border-radius:14px;
+    padding:22px;
+    cursor:pointer;
+    transition:.25s;
+}
+
+.agreement-grid article:hover{
+    transform:translateY(-4px);
+    border-color:#365b7d;
+    box-shadow:var(--shadow);
+}
+
+.agreement-icon{
+    width:42px;
+    height:42px;
+    border-radius:10px;
+    display:grid;
+    place-items:center;
+    margin-bottom:25px;
+    font-size:20px;
+}
+
+.blue{background:rgba(74,139,255,.14);color:#6ca7ff}
+.teal{background:rgba(30,211,154,.13);color:#34dca9}
+.purple{background:rgba(167,124,255,.13);color:#b38cff}
+.amber{background:rgba(244,183,64,.13);color:#f7bf52}
+
+.agreement-grid h3{
+    font-size:15px;
+    margin-bottom:9px;
+}
+
+.agreement-grid p{
+    color:#849bb1;
+    line-height:1.6;
+    font-size:12px;
+    min-height:42px;
+}
+
+.agreement-grid article > span:last-child{
+    color:#659eff;
+    font-size:11px;
+    font-weight:700;
+}
+
+.recent-head{
+    margin-top:65px;
+}
+
+.empty-state{
+    min-height:130px;
+    border:1px dashed #29445d;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#71869c;
+    font-size:13px;
+    background:#0a1b2d;
+}
+
+/* =========================================================
+   DASHBOARD ANALYSIS
+   ========================================================= */
+
+#dashboardDetails{
+    margin-top:28px;
+}
+
+.dashboard-detail{
+    background:#0b1d30;
+    border:1px solid var(--border2);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+}
+
+.dashboard-detail-header{
+    padding:27px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(135deg,#10283f,#0c2034);
+}
+
+.dashboard-file{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.file-icon{
+    width:46px;
+    height:52px;
+    border-radius:9px;
+    background:#183754;
+    display:grid;
+    place-items:center;
+    color:#73aaff;
+    font-weight:800;
+    font-size:12px;
+}
+
+.dashboard-file h3{
+    font-size:17px;
+    margin-bottom:6px;
+}
+
+.dashboard-file p{
+    color:#8198ae;
+    margin:0;
+    font-size:12px;
+}
+
+.score-box{
+    min-width:120px;
+    text-align:center;
+}
+
+.score-number{
+    font-size:39px;
+    font-weight:800;
+}
+
+.score-number span{
+    font-size:14px;
+    color:#71879e;
+    font-weight:500;
+}
+
+.score-label{
+    display:inline-block;
+    margin-top:5px;
+    padding:5px 12px;
+    border-radius:20px;
+    font-size:10px;
+    font-weight:800;
+    text-transform:uppercase;
+}
+
+.score-low{
+    color:#28dba3;
+    background:rgba(32,211,154,.1);
+    border:1px solid rgba(32,211,154,.25);
+}
+
+.score-medium{
+    color:#f5bc45;
+    background:rgba(244,183,64,.1);
+    border:1px solid rgba(244,183,64,.25);
+}
+
+.score-high{
+    color:#ff6a78;
+    background:rgba(255,102,117,.1);
+    border:1px solid rgba(255,102,117,.25);
+}
+
+.dashboard-stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    border-bottom:1px solid var(--border);
+}
+
+.dashboard-stat{
+    padding:22px;
+    border-right:1px solid var(--border);
+}
+
+.dashboard-stat:last-child{
+    border-right:0;
+}
+
+.dashboard-stat span{
+    display:block;
+    color:#6f879f;
+    font-size:9px;
+    letter-spacing:1.3px;
+    font-weight:800;
+}
+
+.dashboard-stat strong{
+    display:block;
+    font-size:28px;
+    margin-top:8px;
+}
+
+.dashboard-stat.high strong{color:#ff6977}
+.dashboard-stat.medium strong{color:#f4bd4b}
+.dashboard-stat.low strong{color:#28d7a1}
+.dashboard-stat.total strong{color:#6ea7ff}
+
+.dashboard-section-title{
+    padding:25px 27px 14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:end;
+}
+
+.dashboard-section-title h3{
+    font-size:18px;
+}
+
+.dashboard-section-title span{
+    color:#71889f;
+    font-size:11px;
+}
+
+.clause-list{
+    padding:0 18px 20px;
+}
+
+.clause{
+    border:1px solid var(--border);
+    background:#0d2135;
+    border-radius:12px;
+    margin:9px 0;
+    padding:18px;
+    display:grid;
+    grid-template-columns:35px 1fr auto;
+    gap:14px;
+}
+
+.clause-number{
+    width:30px;
+    height:30px;
+    border-radius:8px;
+    background:#162f49;
+    color:#78aaff;
+    display:grid;
+    place-items:center;
+    font-size:11px;
+    font-weight:800;
+}
+
+.clause-title{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    flex-wrap:wrap;
+}
+
+.clause-title strong{
+    font-size:13px;
+}
+
+.clause-text{
+    color:#9aadc0;
+    font-size:12px;
+    line-height:1.65;
+    margin:8px 0;
+}
+
+.clause-meta{
+    color:#617a93;
+    font-size:10px;
+}
+
+.severity{
+    border-radius:20px;
+    padding:4px 8px;
+    font-size:8px;
+    font-weight:800;
+}
+
+.severity.high{
+    color:#ff7180;
+    background:rgba(255,102,117,.1);
+}
+
+.severity.medium{
+    color:#f5bd4a;
+    background:rgba(244,183,64,.1);
+}
+
+.severity.low{
+    color:#36dbaa;
+    background:rgba(32,211,154,.1);
+}
+
+.no-analysis{
+    padding:28px;
+    color:#7890a7;
+    text-align:center;
+}
+
+/* =========================================================
+   REVIEW
+   ========================================================= */
+
+.view-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:start;
+    margin-bottom:35px;
+}
+
+.view-title > div p:last-child{
+    color:#8ea4b9;
+    line-height:1.7;
+}
+
+.privacy{
+    border:1px solid var(--border);
+    background:#0c1f32;
+    padding:8px 12px;
+    border-radius:20px;
+    color:#8fa5bb;
+    font-size:11px;
+}
+
+.review-layout{
+    display:grid;
+    grid-template-columns:1fr 340px;
+    gap:25px;
+}
+
+.upload-panel{
+    border:1px solid var(--border);
+    background:#0c1e31;
+    border-radius:16px;
+    padding:20px;
+}
+
+.drop-area{
+    min-height:330px;
+    border:1px dashed #385673;
+    border-radius:13px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    transition:.2s;
+}
+
+.drop-area.dragover{
+    border-color:#5b9cff;
+    background:rgba(91,156,255,.07);
+}
+
+.upload-round{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:#142f4a;
+    color:#6ea6ff;
+    font-size:25px;
+    margin-bottom:15px;
+}
+
+.drop-area h2{
+    font-family:Inter,Arial,sans-serif;
+    font-size:20px;
+}
+
+.drop-area p{
+    color:#879db2;
+    font-size:13px;
+}
+
+.drop-area b{
+    color:#69a3ff;
+}
+
+.drop-area > div{
+    display:flex;
+    gap:7px;
+    margin-top:10px;
+}
+
+.drop-area small{
+    padding:5px 8px;
+    background:#122b44;
+    border-radius:4px;
+    color:#6e879f;
+    font-size:8px;
+    font-weight:700;
+}
+
+.selected{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:15px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    margin-top:12px;
+}
+
+.selected.hidden{
+    display:none;
+}
+
+.pdf{
+    background:#203b58;
+    color:#70a7ff;
+    padding:9px;
+    border-radius:7px;
+    font-size:9px;
+    font-weight:800;
+}
+
+.selected strong{
+    display:block;
+    font-size:12px;
+}
+
+.selected small{
+    display:block;
+    color:#71889e;
+    margin-top:4px;
+}
+
+.selected button{
+    margin-left:auto;
+    border:0;
+    background:none;
+    color:#8da2b7;
+    font-size:20px;
+}
+
+.upload-panel .primary{
+    margin-top:15px;
+}
+
+.review-side{
+    background:#0c1e31;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:24px;
+    height:max-content;
+}
+
+.review-side > div{
+    display:flex;
+    gap:14px;
+    padding:18px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.review-side > div b{
+    color:#5e9dff;
+    font-size:11px;
+}
+
+.review-side > div span{
+    font-size:12px;
+    color:#a0b1c2;
+}
+
+.notice{
+    margin-top:22px;
+    padding:13px;
+    border-radius:8px;
+    background:#10263d;
+    color:#718aa2;
+    font-size:10px;
+    line-height:1.6;
+}
+
+.loading{
+    margin-top:25px;
+    padding:25px;
+    background:#0c2033;
+    border:1px solid var(--border);
+    border-radius:14px;
+    display:flex;
+    gap:18px;
+    align-items:center;
+}
+
+.loading.hidden,
+.results.hidden{
+    display:none;
+}
+
+.spinner{
+    width:35px;
+    height:35px;
+    border:3px solid #1b3853;
+    border-top-color:#5b9cff;
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg)}
+}
+
+.loading h3{
+    margin:4px 0;
+}
+
+.loading p:last-child{
+    color:#7891a9;
+    font-size:12px;
+}
+
+/* =========================================================
+   RESULT CARDS
+   ========================================================= */
+
+.results{
+    margin-top:25px;
+}
+
+.result-main{
+    background:#0c1f32;
+    border:1px solid var(--border2);
+    border-radius:16px;
+    padding:25px;
+}
+
+.result-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.result-top h2{
+    font-family:Inter,Arial,sans-serif;
+    font-size:20px;
+}
+
+.result-score{
+    text-align:center;
+}
+
+.result-score strong{
+    font-size:42px;
+}
+
+.result-score span{
+    color:#7289a0;
+}
+
+.result-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin-top:25px;
+}
+
+.result-box{
+    border:1px solid var(--border);
+    background:#10253a;
+    padding:18px;
+    border-radius:10px;
+}
+
+.result-box span{
+    color:#7189a0;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:1px;
+}
+
+.result-box strong{
+    display:block;
+    font-size:25px;
+    margin-top:8px;
+}
+
+/* =========================================================
+   LIBRARY
+   ========================================================= */
+
+.filter-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:22px;
+}
+
+.filter{
+    border:1px solid var(--border);
+    color:#8298ae;
+    background:#0b1e30;
+    padding:9px 13px;
+    border-radius:20px;
+    font-size:11px;
+}
+
+.filter.active{
+    color:#fff;
+    border-color:#37618b;
+    background:#15304b;
+}
+
+.library-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.library-item{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    background:#0c2033;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:17px;
+}
+
+.library-item:hover{
+    border-color:#315471;
+}
+
+.library-file{
+    width:40px;
+    height:45px;
+    display:grid;
+    place-items:center;
+    border-radius:7px;
+    background:#17314c;
+    color:#6ea5ff;
+    font-size:9px;
+    font-weight:800;
+}
+
+.library-item h3{
+    font-size:13px;
+}
+
+.library-item p{
+    margin:4px 0 0;
+    color:#728aa1;
+    font-size:10px;
+}
+
+.library-risk{
+    margin-left:auto;
+    font-size:10px;
+    font-weight:800;
+}
+
+/* =========================================================
+   LEARN
+   ========================================================= */
+
+.learn-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+.learn-grid article{
+    background:#0c2033;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:25px;
+}
+
+.learn-grid article > span{
+    color:#609fff;
+    font-size:10px;
+    font-weight:800;
+}
+
+.learn-grid h2{
+    font-family:Inter,Arial,sans-serif;
+    font-size:18px;
+    margin:20px 0 10px;
+}
+
+.learn-grid p{
+    color:#8197ac;
+    font-size:12px;
+    line-height:1.7;
+}
+
+.expand{
+    border:0;
+    background:none;
+    color:#6aa3ff;
+    padding:0;
+    font-size:11px;
+    font-weight:700;
+}
+
+.extra{
+    display:none;
+    color:#a2b4c6;
+    font-size:11px;
+    line-height:1.6;
+    margin-top:15px;
+    padding-top:15px;
+    border-top:1px solid var(--border);
+}
+
+.extra.show{
+    display:block;
+}
+
+/* =========================================================
+   SETTINGS
+   ========================================================= */
+
+.settings-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:22px;
+    background:#0c2033;
+    border:1px solid var(--border);
+    border-radius:13px;
+    margin-bottom:12px;
+}
+
+.settings-card h3{
+    font-size:14px;
+}
+
+.settings-card p{
+    color:#8197ad;
+    font-size:11px;
+}
+
+.switch input{
+    display:none;
+}
+
+.switch span{
+    width:44px;
+    height:24px;
+    display:block;
+    background:#20364c;
+    border-radius:20px;
+    position:relative;
+}
+
+.switch span:after{
+    content:"";
+    width:18px;
+    height:18px;
+    position:absolute;
+    left:3px;
+    top:3px;
+    background:#9db0c2;
+    border-radius:50%;
+    transition:.2s;
+}
+
+.switch input:checked + span{
+    background:#286fd4;
+}
+
+.switch input:checked + span:after{
+    transform:translateX(20px);
+    background:#fff;
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+.toast{
+    position:fixed;
+    right:25px;
+    bottom:25px;
+    background:#132a40;
+    border:1px solid #31516f;
+    color:#e7f0f8;
+    padding:13px 17px;
+    border-radius:9px;
+    box-shadow:var(--shadow);
+    transform:translateY(100px);
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+    z-index:100;
+    font-size:12px;
+}
+
+.toast.show{
+    transform:translateY(0);
+    opacity:1;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1100px){
+
+    .agreement-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .page-head{
+        grid-template-columns:1fr;
+    }
+
+    .review-layout{
+        grid-template-columns:1fr;
+    }
+
+    .learn-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:800px){
+
+    .sidebar{
+        transform:translateX(-100%);
+        transition:.25s;
+    }
+
+    .sidebar.open{
+        transform:translateX(0);
+    }
+
+    main{
+        margin-left:0;
+        width:100%;
+    }
+
+    .mobile-menu{
+        display:block;
+        border:1px solid var(--border);
+        background:#0d2135;
+        color:#fff;
+        width:36px;
+        height:36px;
+        border-radius:8px;
+        margin-right:12px;
+    }
+
+    .topbar{
+        padding:0 18px;
+    }
+
+    .status{
+        display:none;
+    }
+
+    .view{
+        padding:32px 18px 60px;
+    }
+
+    h1{
+        font-size:39px;
+    }
+
+    .agreement-grid{
+        grid-template-columns:1fr;
+    }
+
+    .dashboard-stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .dashboard-stat:nth-child(2){
+        border-right:0;
+    }
+
+    .dashboard-stat{
+        border-bottom:1px solid var(--border);
+    }
+
+    .dashboard-detail-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:20px;
+    }
+
+    .clause{
+        grid-template-columns:30px 1fr;
+    }
+
+    .clause > .severity{
+        grid-column:2;
+        width:max-content;
+    }
+
+    .top-actions .icon-button{
+        display:none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- ======================================================
+     SIDEBAR
+     ====================================================== -->
+
+<aside class="sidebar" id="sidebar">
+
+    <a class="brand" href="#" data-view="dashboard">
+        <span class="brand-mark">R</span>
+        RiskLens
+    </a>
+
+    <p class="workspace">PERSONAL WORKSPACE</p>
+
+    <nav>
+
+        <button class="nav active" data-view="dashboard">
+            <span class="nav-icon">▦</span>
+            Overview
+        </button>
+
+        <button class="nav" data-view="review">
+            <span class="nav-icon">⌁</span>
+            New review
+        </button>
+
+        <button class="nav" data-view="library">
+            <span class="nav-icon">□</span>
+            Agreement library
+        </button>
+
+        <button class="nav" data-view="learn">
+            <span class="nav-icon">◈</span>
+            Learn
+        </button>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+        <button class="nav" data-view="settings">
+            <span class="nav-icon">⚙</span>
+            Settings
+        </button>
+
+        <div class="profile">
+            <span class="profile-avatar">RL</span>
+
+            <div>
+                <strong>RiskLens user</strong>
+                <small>Personal plan</small>
+            </div>
+        </div>
+
+    </div>
+
+</aside>
+
+
+<!-- ======================================================
+     MAIN
+     ====================================================== -->
+
+<main>
+
+<header class="topbar">
+
+    <button class="mobile-menu" id="menuBtn">☰</button>
+
+    <div id="breadcrumb">Overview</div>
+
+    <div class="top-actions">
+
+        <span class="status">
+            <b></b>
+            System online
+        </span>
+
+        <button class="icon-button" id="notifications">
+            ♢
+        </button>
+
+        <button class="primary small" data-view="review">
+            + New review
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- ======================================================
+     DASHBOARD
+     ====================================================== -->
+
+<section class="view active" id="dashboard">
+
+    <div class="page-head">
+
+        <div>
+
+            <p class="eyebrow">
+                AGREEMENT INTELLIGENCE
+            </p>
+
+            <h1>
+                See what your agreements
+                <br>
+                <em>really mean.</em>
+            </h1>
+
+            <p class="lead">
+                Understand the cost, obligations, and protections
+                in your financial agreements before you decide.
+            </p>
+
+            <button class="primary" data-view="review">
+                Review an agreement →
+            </button>
+
+        </div>
+
+
+        <div class="hero-card">
+
+            <div class="hero-card-head">
+                <span class="pulse"></span>
+                Your review workspace
+            </div>
+
+            <div class="hero-metric">
+                <strong id="reviewCount">0</strong>
+                <span>reviews completed</span>
+            </div>
+
+            <div class="mini-chart">
+                <i></i>
+                <i></i>
+                <i></i>
+                <i></i>
+                <i></i>
+                <i></i>
+                <i></i>
+            </div>
+
+            <p>
+                Your documents stay in your local workspace.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="section-head">
+
+        <div>
+            <p class="eyebrow">START HERE</p>
+            <h2>Review any agreement</h2>
+        </div>
+
+        <button class="text-button" data-view="review">
+            Start a new review →
+        </button>
+
+    </div>
+
+
+    <div class="agreement-grid">
+
+        <article data-view="review">
+            <span class="agreement-icon blue">₹</span>
+            <h3>Loans &amp; finance</h3>
+            <p>
+                Interest, fees, defaults and repayment terms.
+            </p>
+            <span>Review agreement →</span>
+        </article>
+
+        <article data-view="review">
+            <span class="agreement-icon teal">⌁</span>
+            <h3>Insurance</h3>
+            <p>
+                Coverage, exclusions, renewals and claims.
+            </p>
+            <span>Review agreement →</span>
+        </article>
+
+        <article data-view="review">
+            <span class="agreement-icon purple">◇</span>
+            <h3>Investment &amp; equity</h3>
+            <p>
+                Ownership, dilution, transfer and exit terms.
+            </p>
+            <span>Review agreement →</span>
+        </article>
+
+        <article data-view="review">
+            <span class="agreement-icon amber">▤</span>
+            <h3>Lease &amp; cards</h3>
+            <p>
+                Rent, deposits, APR, charges and limits.
+            </p>
+            <span>Review agreement →</span>
+        </article>
+
+    </div>
+
+
+    <div class="section-head recent-head">
+
+        <div>
+            <p class="eyebrow">ACTIVITY</p>
+            <h2>Recent reviews</h2>
+        </div>
+
+    </div>
+
+
+    <div id="recentReviews" class="empty-state">
+        Loading review history...
+    </div>
+
+
+    <!-- IMPORTANT:
+         Analysis details are displayed here -->
+    <div id="dashboardDetails"></div>
+
+</section>
+
+
+<!-- ======================================================
+     REVIEW
+     ====================================================== -->
+
+<section class="view" id="review">
+
+    <div class="view-title">
+
+        <div>
+
+            <p class="eyebrow">NEW REVIEW</p>
+
+            <h1>Review an agreement</h1>
+
+            <p>
+                Upload a text-readable PDF. You’ll get clear
+                findings, a decision summary, and next steps.
+            </p>
+
+        </div>
+
+        <span class="privacy">
+            ⌁ Private workspace
+        </span>
+
+    </div>
+
+
+    <div class="review-layout">
+
+        <section class="upload-panel">
+
+            <div
+                id="dropArea"
+                class="drop-area"
+                tabindex="0"
+            >
+
+                <input
+                    id="fileInput"
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    hidden
+                >
+
+                <span class="upload-round">↑</span>
+
+                <h2>Drop your PDF here</h2>
+
+                <p>
+                    or
+                    <b id="browseBtn">choose a file</b>
+                    from your computer
+                </p>
+
+                <div>
+                    <small>PDF</small>
+                    <small>20 MB MAX</small>
+                    <small>TEXT-READABLE</small>
+                </div>
+
+            </div>
+
+
+            <div id="selectedFile" class="selected hidden">
+
+                <span class="pdf">PDF</span>
+
+                <div>
+                    <strong id="fileName">
+                        Agreement.pdf
+                    </strong>
+
+                    <small id="fileSize">
+                        0 KB
+                    </small>
+                </div>
+
+                <button id="removeFile">×</button>
+
+            </div>
+
+
+            <button
+                id="analyzeBtn"
+                class="primary full"
+                disabled
+            >
+                <span id="buttonText">
+                    Run agreement review
+                </span>
+                →
+            </button>
+
+        </section>
+
+
+        <aside class="review-side">
+
+            <p class="eyebrow">
+                WHAT YOU RECEIVE
+            </p>
+
+            <div>
+                <b>01</b>
+                <span>
+                    Risk clauses sorted by priority
+                </span>
+            </div>
+
+            <div>
+                <b>02</b>
+                <span>
+                    Simple pros and cons
+                </span>
+            </div>
+
+            <div>
+                <b>03</b>
+                <span>
+                    Decision summary
+                </span>
+            </div>
+
+            <div>
+                <b>04</b>
+                <span>
+                    Practical questions to ask
+                </span>
+            </div>
+
+            <p class="notice">
+                <strong>Helpful, not prescriptive.</strong>
+                RiskLens points to terms you should understand;
+                it does not make decisions for you.
+            </p>
+
+        </aside>
+
+    </div>
+
+
+    <div id="loadingSection" class="loading" style="display:none">
+
+        <div class="spinner"></div>
+
+        <div>
+
+            <p class="eyebrow">
+                ANALYSING AGREEMENT
+            </p>
+
+            <h3>
+                Preparing your decision brief
+            </h3>
+
+            <p id="loadingText">
+                Reading document text...
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <section
+        id="resultsSection"
+        class="results"
+        style="display:none"
+    ></section>
+
+</section>
+
+
+<!-- ======================================================
+     LIBRARY
+     ====================================================== -->
+
+<section class="view" id="library">
+
+    <div class="view-title">
+
+        <div>
+
+            <p class="eyebrow">
+                AGREEMENT LIBRARY
+            </p>
+
+            <h1>Your review history</h1>
+
+            <p>
+                Recent reviews stored in this browser.
+            </p>
+
+        </div>
+
+        <button class="primary small" data-view="review">
+            + New review
+        </button>
+
+    </div>
+
+
+    <div class="filter-row">
+
+        <button class="filter active">All agreements</button>
+        <button class="filter">Loans</button>
+        <button class="filter">Insurance</button>
+        <button class="filter">Investment</button>
+        <button class="filter">Lease &amp; cards</button>
+
+    </div>
+
+
+    <div id="libraryList" class="library-list">
+        Loading...
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     LEARN
+     ====================================================== -->
+
+<section class="view" id="learn">
+
+    <div class="view-title">
+
+        <div>
+
+            <p class="eyebrow">
+                LEARNING CENTRE
+            </p>
+
+            <h1>
+                Understand before you sign
+            </h1>
+
+            <p>
+                Simple explainers for common agreement terms.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="learn-grid">
+
+        <article>
+
+            <span>01</span>
+
+            <h2>Know your total cost</h2>
+
+            <p>
+                Look beyond the headline rate. Check processing
+                fees, penalties, taxes, insurance premiums and
+                recurring charges.
+            </p>
+
+            <button class="expand">
+                Read guidance +
+            </button>
+
+            <div class="extra">
+                Ask for a written breakdown showing every
+                one-time and recurring cost over the full term.
+            </div>
+
+        </article>
+
+
+        <article>
+
+            <span>02</span>
+
+            <h2>Check what can change</h2>
+
+            <p>
+                Rates, fees, coverage and rules can sometimes
+                change after you sign.
+            </p>
+
+            <button class="expand">
+                Read guidance +
+            </button>
+
+            <div class="extra">
+                Find the change-notice period, the party who can
+                change the terms, and your option to cancel.
+            </div>
+
+        </article>
+
+
+        <article>
+
+            <span>03</span>
+
+            <h2>Read the exclusions</h2>
+
+            <p>
+                The most important protection may be limited by
+                an exclusion, waiting period or condition.
+            </p>
+
+            <button class="expand">
+                Read guidance +
+            </button>
+
+            <div class="extra">
+                Write down the exclusions that matter to your
+                situation and ask the provider to explain them.
+            </div>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     SETTINGS
+     ====================================================== -->
+
+<section class="view" id="settings">
+
+    <div class="view-title">
+
+        <div>
+
+            <p class="eyebrow">SETTINGS</p>
+
+            <h1>Workspace settings</h1>
+
+            <p>
+                Control your review preferences.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="settings-card">
+
+        <div>
+            <h3>Plain-language explanations</h3>
+
+            <p>
+                Show a short explanation and next step for
+                every finding.
+            </p>
+        </div>
+
+        <label class="switch">
+
+            <input
+                id="plainLanguage"
+                type="checkbox"
+                checked
+            >
+
+            <span></span>
+
+        </label>
+
+    </div>
+
+
+    <div class="settings-card">
+
+        <div>
+
+            <h3>Reviewer feedback collection</h3>
+
+            <p>
+                Save your Yes/No review choices for future
+                supervised model training.
+            </p>
+
+        </div>
+
+        <label class="switch">
+
+            <input
+                id="feedbackEnabled"
+                type="checkbox"
+                checked
+            >
+
+            <span></span>
+
+        </label>
+
+    </div>
+
+</section>
+
+</main>
+</div>
+
+
+<div id="toast" class="toast"></div>
+
+
+<script>
+/* =========================================================
+   RISK LENS — COMPLETE JAVASCRIPT
+   ========================================================= */
+
+const API_BASE = "";
+
+let selectedFile = null;
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function escapeHTML(value){
+
+    if(value === null || value === undefined){
+        return "";
+    }
+
+    return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+
+function showToast(message){
+
+    const toast = document.getElementById("toast");
+
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    setTimeout(()=>{
+        toast.classList.remove("show");
+    },3000);
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+function openView(viewName){
+
+    document.querySelectorAll(".view").forEach(view=>{
+        view.classList.remove("active");
+    });
+
+    const target = document.getElementById(viewName);
+
+    if(target){
+        target.classList.add("active");
+    }
+
+    document.querySelectorAll(".nav").forEach(nav=>{
+        nav.classList.toggle(
+            "active",
+            nav.dataset.view === viewName
+        );
+    });
+
+    const names = {
+        dashboard:"Overview",
+        review:"New review",
+        library:"Agreement library",
+        learn:"Learn",
+        settings:"Settings"
+    };
+
+    document.getElementById("breadcrumb").textContent =
+        names[viewName] || "Overview";
+
+    document.getElementById("sidebar")
+        .classList.remove("open");
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+    if(viewName === "dashboard"){
+        loadDashboard();
+    }
+
+    if(viewName === "library"){
+        loadLibrary();
+    }
+}
+
+
+document.addEventListener("click",event=>{
+
+    const target = event.target.closest("[data-view]");
+
+    if(!target){
+        return;
+    }
+
+    event.preventDefault();
+
+    openView(target.dataset.view);
+});
+
+
+document.getElementById("menuBtn").addEventListener("click",()=>{
+
+    document
+        .getElementById("sidebar")
+        .classList.toggle("open");
+
+});
+
+
+/* =========================================================
+   FILE UPLOAD
+   ========================================================= */
+
+const dropArea =
+    document.getElementById("dropArea");
+
+const fileInput =
+    document.getElementById("fileInput");
+
+const browseBtn =
+    document.getElementById("browseBtn");
+
+const selectedFileBox =
+    document.getElementById("selectedFile");
+
+const analyzeBtn =
+    document.getElementById("analyzeBtn");
+
+
+browseBtn.addEventListener("click",event=>{
+
+    event.stopPropagation();
+
+    fileInput.click();
+
+});
+
+
+dropArea.addEventListener("click",event=>{
+
+    if(event.target.closest("#browseBtn")){
+        return;
+    }
+
+    fileInput.click();
+
+});
+
+
+fileInput.addEventListener("change",()=>{
+
+    if(fileInput.files.length){
+
+        selectFile(fileInput.files[0]);
+
+    }
+
+});
+
+
+["dragenter","dragover"].forEach(type=>{
+
+    dropArea.addEventListener(type,event=>{
+
+        event.preventDefault();
+
+        dropArea.classList.add("dragover");
+
+    });
+
+});
+
+
+["dragleave","drop"].forEach(type=>{
+
+    dropArea.addEventListener(type,event=>{
+
+        event.preventDefault();
+
+        dropArea.classList.remove("dragover");
+
+    });
+
+});
+
+
+dropArea.addEventListener("drop",event=>{
+
+    const files = event.dataTransfer.files;
+
+    if(files.length){
+        selectFile(files[0]);
+    }
+
+});
+
+
+function selectFile(file){
+
+    if(
+        file.type !== "application/pdf" &&
+        !file.name.toLowerCase().endsWith(".pdf")
+    ){
+
+        showToast("Please select a PDF file.");
+
+        return;
+    }
+
+    if(file.size > 20 * 1024 * 1024){
+
+        showToast("File is larger than 20 MB.");
+
+        return;
+    }
+
+    selectedFile = file;
+
+    document.getElementById("fileName")
+        .textContent = file.name;
+
+    document.getElementById("fileSize")
+        .textContent =
+        (file.size / 1024).toFixed(1) + " KB";
+
+    selectedFileBox.classList.remove("hidden");
+
+    analyzeBtn.disabled = false;
+
+    analyzeBtn.style.opacity = "1";
+
+}
+
+
+document.getElementById("removeFile")
+    .addEventListener("click",()=>{
+
+        selectedFile = null;
+
+        fileInput.value = "";
+
+        selectedFileBox.classList.add("hidden");
+
+        analyzeBtn.disabled = true;
+
+    });
+
+
+/* =========================================================
+   ANALYSIS
+   ========================================================= */
+
+analyzeBtn.addEventListener("click",runAnalysis);
+
+
+async function runAnalysis(){
+
+    if(!selectedFile){
+        showToast("Select a PDF first.");
+        return;
+    }
+
+    const loading =
+        document.getElementById("loadingSection");
+
+    const results =
+        document.getElementById("resultsSection");
+
+    const buttonText =
+        document.getElementById("buttonText");
+
+    loading.style.display = "flex";
+    results.style.display = "none";
+
+    analyzeBtn.disabled = true;
+
+    buttonText.textContent = "Analysing...";
+
+    const loadingText =
+        document.getElementById("loadingText");
+
+    loadingText.textContent =
+        "Uploading document...";
+
+
+    try{
+
+        const formData = new FormData();
+
+        formData.append(
+            "file",
+            selectedFile
+        );
+
+
+        /*
+         * Try the most common endpoints used by the
+         * RiskLens FastAPI backend.
+         */
+
+        const endpoints = [
+            "/analyze",
+            "/api/analyze",
+            "/api/reviews",
+            "/api/review"
+        ];
+
+
+        let response = null;
+        let lastError = null;
+
+
+        for(const endpoint of endpoints){
+
+            try{
+
+                loadingText.textContent =
+                    "Connecting to RiskLens analysis engine...";
+
+                const r = await fetch(
+                    API_BASE + endpoint,
+                    {
+                        method:"POST",
+                        body:formData
+                    }
+                );
+
+
+                if(r.ok){
+
+                    response = r;
+
+                    break;
+
+                }
+
+                lastError =
+                    new Error(
+                        endpoint +
+                        " returned " +
+                        r.status
+                    );
+
+            }catch(error){
+
+                lastError = error;
+
+            }
+
+        }
+
+
+        if(!response){
+
+            throw lastError ||
+                new Error(
+                    "Analysis endpoint not found."
+                );
+
+        }
+
+
+        loadingText.textContent =
+            "Processing agreement clauses...";
+
+
+        const data = await response.json();
+
+
+        /*
+         * Store complete analysis locally.
+         * This allows the dashboard to show the same
+         * analysis after navigating away from Review.
+         */
+
+        localStorage.setItem(
+            "risklens_latest_analysis",
+            JSON.stringify(data)
+        );
+
+
+        const history =
+            JSON.parse(
+                localStorage.getItem(
+                    "risklens_history"
+                ) || "[]"
+            );
+
+
+        history.unshift(data);
+
+        localStorage.setItem(
+            "risklens_history",
+            JSON.stringify(
+                history.slice(0,25)
+            )
+        );
+
+
+        loadingText.textContent =
+            "Building dashboard analysis...";
+
+
+        renderResults(data);
+
+        await loadDashboard();
+
+
+        showToast(
+            "Agreement analysis completed."
+        );
+
+
+    }catch(error){
+
+        console.error(error);
+
+        results.style.display = "block";
+
+        results.innerHTML = `
+            <div class="result-main">
+                <p class="eyebrow">ANALYSIS ERROR</p>
+                <h2>Could not complete the review</h2>
+                <p style="
+                    color:#899fb4;
+                    line-height:1.7;
+                    margin-top:10px;
+                ">
+                    ${escapeHTML(error.message)}
+                </p>
+            </div>
+        `;
+
+        showToast(
+            "Analysis failed. Check the backend terminal."
+        );
+
+    }finally{
+
+        loading.style.display = "none";
+
+        analyzeBtn.disabled = false;
+
+        buttonText.textContent =
+            "Run agreement review";
+
+    }
+
+}
+
+
+/* =========================================================
+   NORMALIZE BACKEND DATA
+   ========================================================= */
+
+function normalizeData(data){
+
+    if(!data){
+        return {};
+    }
+
+    /*
+     * Support different possible FastAPI response shapes.
+     */
+
+    const document =
+        data.document ||
+        data.documents?.[0] ||
+        {};
+
+    const report =
+        data.report ||
+        data.analysis ||
+        data.result ||
+        {};
+
+    let clauses =
+        data.clauses ||
+        report.clauses ||
+        data.findings ||
+        [];
+
+    if(!Array.isArray(clauses)){
+        clauses = [];
+    }
+
+    return {
+        document,
+        report,
+        clauses
+    };
+
+}
+
+
+/* =========================================================
+   RISK LABEL
+   ========================================================= */
+
+function riskLabel(label){
+
+    const labels = {
+
+        high_interest:"High Interest",
+
+        hidden_charges:"Hidden Charges",
+
+        penalty_clause:"Penalty Clause",
+
+        automatic_renewal:"Automatic Renewal",
+
+        unilateral_change:"Unilateral Change",
+
+        foreclosure:"Foreclosure Risk",
+
+        coverage_exclusion:"Coverage Exclusion",
+
+        waiting_period:"Waiting Period",
+
+        late_payment:"Late Payment",
+
+        default_clause:"Default Clause",
+
+        interest_rate:"Interest Rate",
+
+        no_risk:"No Risk"
+
+    };
+
+    return labels[label] ||
+        String(label || "No Risk")
+            .replaceAll("_"," ")
+            .replace(/\b\w/g,c=>c.toUpperCase());
+
+}
+
+
+/* =========================================================
+   SEVERITY
+   ========================================================= */
+
+function severityClass(label){
+
+    const high = [
+        "high_interest",
+        "hidden_charges",
+        "penalty_clause",
+        "unilateral_change",
+        "foreclosure",
+        "coverage_exclusion",
+        "late_payment",
+        "default_clause"
+    ];
+
+    const medium = [
+        "automatic_renewal",
+        "waiting_period",
+        "interest_rate"
+    ];
+
+    if(high.includes(label)){
+        return "high";
+    }
+
+    if(medium.includes(label)){
+        return "medium";
+    }
+
+    return "low";
+}
+
+
+/* =========================================================
+   SCORE
+   ========================================================= */
+
+function getScore(report){
+
+    const values = [
+        report.risk_score,
+        report.overall_risk_score,
+        report.score
+    ];
+
+    for(const value of values){
+
+        if(
+            value !== undefined &&
+            value !== null &&
+            value !== ""
+        ){
+
+            const n = Number(value);
+
+            if(!Number.isNaN(n)){
+                return Math.round(n);
+            }
+
+        }
+
+    }
+
+    return 0;
+}
+
+
+/* =========================================================
+   DASHBOARD ANALYSIS
+   ========================================================= */
+
+function renderDashboardDocumentDetails(
+    container,
+    data
+){
+
+    const normalized =
+        normalizeData(data);
+
+    const document =
+        normalized.document;
+
+    const report =
+        normalized.report;
+
+    const clauses =
+        normalized.clauses;
+
+
+    const score =
+        getScore(report);
+
+
+    const overallRisk =
+        report.overall_risk ||
+        report.risk_level ||
+        (
+            score >= 70
+            ? "High"
+            : score >= 35
+            ? "Medium"
+            : "Low"
+        );
+
+
+    const high =
+        Number(
+            report.high_risk_count ??
+            report.high_count ??
+            clauses.filter(c=>{
+                const p =
+                    Array.isArray(c.predictions)
+                    ? c.predictions[0]
+                    : c.prediction || c;
+
+                return severityClass(
+                    p?.risk_label
+                ) === "high";
+            }).length
+        );
+
+
+    const medium =
+        Number(
+            report.medium_risk_count ??
+            report.medium_count ??
+            clauses.filter(c=>{
+                const p =
+                    Array.isArray(c.predictions)
+                    ? c.predictions[0]
+                    : c.prediction || c;
+
+                return severityClass(
+                    p?.risk_label
+                ) === "medium";
+            }).length
+        );
+
+
+    const low =
+        Number(
+            report.low_risk_count ??
+            report.low_count ??
+            clauses.filter(c=>{
+                const p =
+                    Array.isArray(c.predictions)
+                    ? c.predictions[0]
+                    : c.prediction || c;
+
+                return severityClass(
+                    p?.risk_label
+                ) === "low";
+            }).length
+        );
+
+
+    let scoreClass =
+        String(overallRisk)
+            .toLowerCase();
+
+    if(!["low","medium","high"].includes(scoreClass)){
+        scoreClass =
+            score >= 70
+            ? "high"
+            : score >= 35
+            ? "medium"
+            : "low";
+    }
+
+
+    let clauseHTML = "";
+
+
+    if(clauses.length){
+
+        clauseHTML =
+            clauses.map(
+                (clause,index)=>{
+
+                    const predictions =
+                        Array.isArray(
+                            clause.predictions
+                        )
+                        ? clause.predictions
+                        : [];
+
+
+                    const prediction =
+                        predictions[0] ||
+                        clause.prediction ||
+                        clause ||
+                        {};
+
+
+                    const label =
+                        prediction.risk_label ||
+                        prediction.label ||
+                        clause.risk_label ||
+                        "no_risk";
+
+
+                    const confidence =
+                        Number(
+                            prediction.confidence ||
+                            clause.confidence ||
+                            0
+                        );
+
+
+                    const severity =
+                        severityClass(label);
+
+
+                    const text =
+                        clause.clause_text ||
+                        clause.text ||
+                        clause.original_text ||
+                        clause.content ||
+                        "";
+
+
+                    return `
+
+                        <div class="clause">
+
+                            <div class="clause-number">
+                                ${index + 1}
+                            </div>
+
+                            <div>
+
+                                <div class="clause-title">
+
+                                    <strong>
+                                        ${escapeHTML(
+                                            riskLabel(label)
+                                        )}
+                                    </strong>
+
+                                    <span
+                                        class="severity ${severity}"
+                                    >
+                                        ${severity.toUpperCase()}
+                                    </span>
+
+                                </div>
+
+                                <p class="clause-text">
+                                    ${escapeHTML(text)}
+                                </p>
+
+                                <div class="clause-meta">
+
+                                    ${
+                                        prediction.model_name
+                                        ? "Model: " +
+                                          escapeHTML(
+                                              prediction.model_name
+                                          )
+                                        : "Model: RiskLens Analyzer"
+                                    }
+
+                                    ${
+                                        confidence
+                                        ? " · Confidence: " +
+                                          Math.round(
+                                              confidence * 100
+                                          ) +
+                                          "%"
+                                        : ""
+                                    }
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            ).join("");
+
+    }else{
+
+        clauseHTML = `
+
+            <div class="no-analysis">
+
+                No clause-level findings were returned
+                by the analysis engine.
+
+            </div>
+
+        `;
+
+    }
+
+
+    const filename =
+        document.filename ||
+        document.file_name ||
+        data.filename ||
+        "Agreement";
+
+
+    const documentType =
+        document.document_type ||
+        document.type ||
+        data.document_type ||
+        "Financial Agreement";
+
+
+    container.innerHTML = `
+
+        <div class="dashboard-detail">
+
+            <div class="dashboard-detail-header">
+
+                <div class="dashboard-file">
+
+                    <div class="file-icon">
+                        PDF
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            ${escapeHTML(filename)}
+                        </h3>
+
+                        <p>
+                            ${escapeHTML(documentType)}
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="score-box">
+
+                    <div class="score-number">
+                        ${score}
+                        <span>/100</span>
+                    </div>
+
+                    <span
+                        class="score-label score-${scoreClass}"
+                    >
+                        ${escapeHTML(overallRisk)}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-stats">
+
+                <div class="dashboard-stat high">
+
+                    <span>HIGH RISK</span>
+
+                    <strong>
+                        ${high}
+                    </strong>
+
+                </div>
+
+
+                <div class="dashboard-stat medium">
+
+                    <span>MEDIUM RISK</span>
+
+                    <strong>
+                        ${medium}
+                    </strong>
+
+                </div>
+
+
+                <div class="dashboard-stat low">
+
+                    <span>LOW RISK</span>
+
+                    <strong>
+                        ${low}
+                    </strong>
+
+                </div>
+
+
+                <div class="dashboard-stat total">
+
+                    <span>CLAUSES ANALYSED</span>
+
+                    <strong>
+                        ${clauses.length}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-section-title">
+
+                <div>
+
+                    <p class="eyebrow">
+                        CLAUSE-LEVEL ANALYSIS
+                    </p>
+
+                    <h3>
+                        Detected findings
+                    </h3>
+
+                </div>
+
+                <span>
+                    ${clauses.length} clauses
+                </span>
+
+            </div>
+
+
+            <div class="clause-list">
+
+                ${clauseHTML}
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   DASHBOARD LOAD
+   ========================================================= */
+
+async function loadDashboard(){
+
+    const dashboardDetails =
+        document.getElementById(
+            "dashboardDetails"
+        );
+
+    const recentReviews =
+        document.getElementById(
+            "recentReviews"
+        );
+
+
+    /*
+     * First load latest locally stored analysis.
+     */
+
+    const localLatest =
+        localStorage.getItem(
+            "risklens_latest_analysis"
+        );
+
+
+    if(localLatest){
+
+        try{
+
+            const parsed =
+                JSON.parse(localLatest);
+
+            renderDashboardDocumentDetails(
+                dashboardDetails,
+                parsed
+            );
+
+        }catch(error){
+
+            console.error(error);
+
+        }
+
+    }
+
+
+    /*
+     * Load backend history if available.
+     */
+
+    const endpoints = [
+        "/api/reviews",
+        "/api/history",
+        "/reviews",
+        "/history"
+    ];
+
+
+    let backendData = null;
+
+
+    for(const endpoint of endpoints){
+
+        try{
+
+            const response =
+                await fetch(
+                    API_BASE + endpoint
+                );
+
+
+            if(response.ok){
+
+                backendData =
+                    await response.json();
+
+                break;
+
+            }
+
+        }catch(error){
+
+            console.log(
+                "History endpoint unavailable:",
+                endpoint
+            );
+
+        }
+
+    }
+
+
+    if(backendData){
+
+        renderHistory(
+            recentReviews,
+            backendData
+        );
+
+    }else{
+
+        const history =
+            JSON.parse(
+                localStorage.getItem(
+                    "risklens_history"
+                ) || "[]"
+            );
+
+
+        renderHistory(
+            recentReviews,
+            history
+        );
+
+    }
+
+
+    const history =
+        JSON.parse(
+            localStorage.getItem(
+                "risklens_history"
+            ) || "[]"
+        );
+
+
+    document.getElementById(
+        "reviewCount"
+    ).textContent =
+        history.length;
+
+}
+
+
+/* =========================================================
+   HISTORY
+   ========================================================= */
+
+function renderHistory(
+    container,
+    data
+){
+
+    let items = data;
+
+
+    if(data && !Array.isArray(data)){
+
+        items =
+            data.reviews ||
+            data.documents ||
+            data.items ||
+            data.history ||
+            [];
+
+    }
+
+
+    if(!Array.isArray(items)){
+        items = [];
+    }
+
+
+    if(!items.length){
+
+        container.className =
+            "empty-state";
+
+        container.textContent =
+            "No reviews yet. Upload an agreement to begin.";
+
+        return;
+
+    }
+
+
+    container.className =
+        "library-list";
+
+
+    container.innerHTML =
+        items.slice(0,8).map(
+            (item,index)=>{
+
+                const normalized =
+                    normalizeData(item);
+
+                const doc =
+                    normalized.document;
+
+                const report =
+                    normalized.report;
+
+
+                const filename =
+                    doc.filename ||
+                    doc.file_name ||
+                    item.filename ||
+                    "Agreement";
+
+
+                const risk =
+                    report.overall_risk ||
+                    report.risk_level ||
+                    "Low";
+
+
+                return `
+
+                    <div
+                        class="library-item"
+                        data-history-index="${index}"
+                    >
+
+                        <div class="library-file">
+                            PDF
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                ${escapeHTML(filename)}
+                            </h3>
+
+                            <p>
+                                ${escapeHTML(risk)}
+                                risk ·
+                                ${normalized.clauses.length}
+                                clauses analysed
+                            </p>
+
+                        </div>
+
+                        <div
+                            class="library-risk"
+                            style="
+                                color:
+                                ${
+                                    String(risk)
+                                        .toLowerCase()
+                                        === "high"
+                                    ? "#ff6977"
+                                    :
+                                    String(risk)
+                                        .toLowerCase()
+                                        === "medium"
+                                    ? "#f4bd4b"
+                                    : "#28d7a1"
+                                };
+                            "
+                        >
+                            ${escapeHTML(risk)}
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+        ).join("");
+
+
+    /*
+     * Clicking a history item shows its complete
+     * analysis on the dashboard.
+     */
+
+    container
+        .querySelectorAll(".library-item")
+        .forEach(item=>{
+
+            item.addEventListener(
+                "click",
+                ()=>{
+
+                    const index =
+                        Number(
+                            item.dataset.historyIndex
+                        );
+
+                    const selected =
+                        items[index];
+
+                    localStorage.setItem(
+                        "risklens_latest_analysis",
+                        JSON.stringify(selected)
+                    );
+
+                    openView("dashboard");
+
+                }
+            );
+
+        });
+
+}
+
+
+/* =========================================================
+   LIBRARY
+   ========================================================= */
+
+async function loadLibrary(){
+
+    const list =
+        document.getElementById(
+            "libraryList"
+        );
+
+
+    const history =
+        JSON.parse(
+            localStorage.getItem(
+                "risklens_history"
+            ) || "[]"
+        );
+
+
+    if(!history.length){
+
+        list.innerHTML = `
+
+            <div class="empty-state">
+                No agreements have been reviewed yet.
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    list.innerHTML =
+        history.map(
+            (item,index)=>{
+
+                const normalized =
+                    normalizeData(item);
+
+                const doc =
+                    normalized.document;
+
+                const report =
+                    normalized.report;
+
+
+                const filename =
+                    doc.filename ||
+                    doc.file_name ||
+                    item.filename ||
+                    "Agreement";
+
+
+                const risk =
+                    report.overall_risk ||
+                    "Low";
+
+
+                return `
+
+                    <div
+                        class="library-item"
+                        data-index="${index}"
+                    >
+
+                        <div class="library-file">
+                            PDF
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                ${escapeHTML(filename)}
+                            </h3>
+
+                            <p>
+                                ${normalized.clauses.length}
+                                clauses analysed
+                            </p>
+
+                        </div>
+
+                        <div class="library-risk">
+                            ${escapeHTML(risk)}
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+        ).join("");
+
+
+    list
+        .querySelectorAll(".library-item")
+        .forEach(item=>{
+
+            item.addEventListener(
+                "click",
+                ()=>{
+
+                    const index =
+                        Number(
+                            item.dataset.index
+                        );
+
+                    localStorage.setItem(
+                        "risklens_latest_analysis",
+                        JSON.stringify(
+                            history[index]
+                        )
+                    );
+
+                    openView("dashboard");
+
+                }
+            );
+
+        });
+
+}
+
+
+/* =========================================================
+   RESULTS
+   ========================================================= */
+
+function renderResults(data){
+
+    const normalized =
+        normalizeData(data);
+
+    const report =
+        normalized.report;
+
+    const clauses =
+        normalized.clauses;
+
+    const score =
+        getScore(report);
+
+    const risk =
+        report.overall_risk ||
+        report.risk_level ||
+        (
+            score >= 70
+            ? "High"
+            : score >= 35
+            ? "Medium"
+            : "Low"
+        );
+
+
+    const results =
+        document.getElementById(
+            "resultsSection"
+        );
+
+
+    results.style.display = "block";
+
+
+    results.innerHTML = `
+
+        <div class="result-main">
+
+            <div class="result-top">
+
+                <div>
+
+                    <p class="eyebrow">
+                        ANALYSIS COMPLETE
+                    </p>
+
+                    <h2>
+                        Agreement analysis
+                    </h2>
+
+                </div>
+
+                <div class="result-score">
+
+                    <strong>
+                        ${score}
+                    </strong>
+
+                    <span>/100</span>
+
+                    <div
+                        class="score-label score-${
+                            String(risk).toLowerCase()
+                        }"
+                    >
+                        ${escapeHTML(risk)}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="result-grid">
+
+                <div class="result-box">
+
+                    <span>
+                        HIGH RISK
+                    </span>
+
+                    <strong>
+                        ${
+                            report.high_risk_count ??
+                            clauses.filter(c=>{
+                                const p =
+                                    c.predictions?.[0] ||
+                                    c.prediction ||
+                                    c;
+
+                                return severityClass(
+                                    p?.risk_label
+                                ) === "high";
+                            }).length
+                        }
+                    </strong>
+
+                </div>
+
+
+                <div class="result-box">
+
+                    <span>
+                        MEDIUM RISK
+                    </span>
+
+                    <strong>
+                        ${
+                            report.medium_risk_count ??
+                            clauses.filter(c=>{
+                                const p =
+                                    c.predictions?.[0] ||
+                                    c.prediction ||
+                                    c;
+
+                                return severityClass(
+                                    p?.risk_label
+                                ) === "medium";
+                            }).length
+                        }
+                    </strong>
+
+                </div>
+
+
+                <div class="result-box">
+
+                    <span>
+                        CLAUSES
+                    </span>
+
+                    <strong>
+                        ${clauses.length}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div style="margin-top:25px">
+
+                <p class="eyebrow">
+                    NEXT STEP
+                </p>
+
+                <p style="
+                    color:#8fa4b8;
+                    font-size:12px;
+                    line-height:1.7;
+                ">
+                    Your complete analysis has also been
+                    saved to the RiskLens dashboard.
+                </p>
+
+                <button
+                    class="primary"
+                    onclick="openView('dashboard')"
+                >
+                    View full dashboard analysis →
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   LEARN ACCORDIONS
+   ========================================================= */
+
+document.querySelectorAll(".expand")
+.forEach(button=>{
+
+    button.addEventListener(
+        "click",
+        ()=>{
+
+            const extra =
+                button.nextElementSibling;
+
+            extra.classList.toggle("show");
+
+            button.textContent =
+                extra.classList.contains("show")
+                ? "Hide guidance −"
+                : "Read guidance +";
+
+        }
+    );
+
+});
+
+
+/* =========================================================
+   FILTER BUTTONS
+   ========================================================= */
+
+document.querySelectorAll(".filter")
+.forEach(button=>{
+
+    button.addEventListener(
+        "click",
+        ()=>{
+
+            document
+                .querySelectorAll(".filter")
+                .forEach(b=>
+                    b.classList.remove("active")
+                );
+
+            button.classList.add("active");
+
+        }
+    );
+
+});
+
+
+/* =========================================================
+   NOTIFICATIONS
+   ========================================================= */
+
+document.getElementById(
+    "notifications"
+).addEventListener(
+    "click",
+    ()=>{
+        showToast(
+            "No new notifications."
+        );
+    }
+);
+
+
+/* =========================================================
+   INITIAL LOAD
+   ========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    ()=>{
+
+        loadDashboard();
+
+    }
+);
+
+</script>
+
+</body>
+</html>

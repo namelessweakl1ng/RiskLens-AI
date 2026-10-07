@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Environment variables / secrets
+.env
+.env.*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# PDF / uploaded files
+*.pdf
+
+# AI model files
+models/
+*.bin
+*.pt
+*.pth
+*.safetensors
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.dbuploads/ 
