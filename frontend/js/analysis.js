@@ -93,7 +93,7 @@ export function renderAnalysis(result) {
         fact("Document type", title(result.classification.document_type)),
         fact(
           "Material clauses",
-          result.clauses.filter((c) => c.findings.length).length,
+          result.clauses.filter((c) => c.findings.length || (result.legacy_unverified && c.predicted_label !== "no_risk")).length,
         ),
         fact(
           "Model device",
@@ -139,7 +139,7 @@ export function renderAnalysis(result) {
     categories.length
       ? categories.map(([category, count]) => {
           const support = result.clauses.filter((c) =>
-            c.findings.some((f) => f.category === category),
+            c.findings.some((f) => f.category === category) || (result.legacy_unverified && c.predicted_label === category),
           );
           const finding = support
             .flatMap((c) => c.findings)
@@ -161,8 +161,8 @@ export function renderAnalysis(result) {
           ].join(" / ");
           return el(
             "article",
-            { class: `risk-card ${finding?.severity || "low"}` },
-            badge(finding?.severity || "low"),
+            { class: `risk-card ${finding?.severity || support[0]?.severity || "low"}` },
+            badge(finding?.severity || support[0]?.severity || "low"),
             el("h3", {}, riskName(category)),
             el(
               "p",
@@ -377,7 +377,7 @@ export function renderClauses() {
       {},
       el("td", {}, clause.page_number ?? "Unknown"),
       el("td", {}, button),
-      el("td", {}, riskName(clause.predicted_label)),
+      el("td", {}, clause.detection_method === "uncertain" ? "Uncertain prediction" : riskName(clause.predicted_label)),
       el("td", {}, badge(clause.severity)),
       el("td", {}, el("span", { class: "tiny" }, confidence)),
       el(
@@ -388,7 +388,7 @@ export function renderClauses() {
           { class: "tag" },
           clause.detection_method === "safe"
             ? "No finding"
-            : title(clause.detection_method),
+            : clause.detection_method === "legacy_unverified" ? "Historical / unverified" : title(clause.detection_method),
         ),
       ),
       el(

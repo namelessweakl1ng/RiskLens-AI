@@ -43,9 +43,15 @@ class RiskModel:
             ):
                 raise ValueError("Missing RiskLens deployment metadata")
             self._tokenizer = AutoTokenizer.from_pretrained(self.source, trust_remote_code=False)
-            self._model = AutoModelForSequenceClassification.from_pretrained(
-                self.source, trust_remote_code=False
+            self._model, loading = AutoModelForSequenceClassification.from_pretrained(
+                self.source, trust_remote_code=False, output_loading_info=True
             )
+            if (
+                loading.get("missing_keys")
+                or loading.get("mismatched_keys")
+                or loading.get("error_msgs")
+            ):
+                raise ValueError("Checkpoint has missing or incompatible model weights")
             device = "cuda" if torch.cuda.is_available() else "cpu"
             self._model.to(device).eval()
             self._status = ModelStatus(

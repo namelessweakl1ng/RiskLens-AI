@@ -22,4 +22,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: for file in frontend/js/*.js; do node --check "$file" || exit 1; done
+      - run: for file in frontend/js/*.js tests/*.cjs; do node --check "$file" || exit 1; done

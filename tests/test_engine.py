@@ -163,3 +163,39 @@ def test_invalid_probability_distribution_falls_back_explicitly():
     assert result.mode == "rule_only"
     assert result.model_status.load_error.startswith("Model inference failed")
     assert result.clauses[0].model_confidence is None
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "The processing fee will be waived.",
+        "The lender cannot foreclose on the property.",
+        "The processing fee shall not be charged.",
+    ],
+)
+def test_review_negated_obligations(text):
+    assert engine(text).risk_score == 0
+
+
+def test_review_independent_positive_obligation():
+    result = engine("No processing fee applies, and a default penalty is payable.")
+    assert result.risk_score > 0
+    assert result.clauses[0].predicted_label == "penalty_clause"
+
+
+def test_review_uncertain_prediction_is_explicit():
+    from backend.taxonomy import LABELS
+
+    probabilities = {label: 0.08 for label in LABELS}
+    probabilities["high_interest"] = 0.28
+    result = engine("The parties acknowledge the signed agreement.", probabilities)
+    assert result.risk_score == 0
+    assert result.clauses[0].detection_method == "uncertain"
+
+
+def test_without_notice_does_not_negate_repossession():
+    result = engine("Without prior notice, the lender may repossess the collateral.")
+    assert {f.category for c in result.clauses for f in c.findings} >= {
+        "foreclosure",
+        "unilateral_change",
+    }

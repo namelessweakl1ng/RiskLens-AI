@@ -24,15 +24,17 @@ def rule_matches(text: str) -> list[RuleMatch]:
         for number, pattern in enumerate(patterns):
             for match in re.finditer(pattern, text, re.I):
                 before = re.split(
-                    r"[.;!?]|\b(?:but|however|yet)\b", text[: match.start()], flags=re.I
+                    r"[.;!?]|,\s*(?:and\b)?|\b(?:but|however|yet)\b",
+                    text[: match.start()],
+                    flags=re.I,
                 )[-1][-90:]
                 after = text[match.end() : match.end() + 60]
                 # "not covered" is positive exclusion evidence, not a negated rule.
                 negated = re.search(
-                    r"\b(?:no|not|never|without|waived?|zero)\b[^.;!?]{0,80}$", before, re.I
+                    r"\b(?:no|not|cannot|never|without|waived?|zero)\b[^.;!?]{0,80}$", before, re.I
                 )
                 negated_after = re.match(
-                    r"\s*(?:shall |will |does |do |is |are )?(?:not (?:apply|payable|charged)|waived|does not apply)",
+                    r"\s*(?:(?:shall|will|does|do|is|are)\s+)?(?:not\s+(?:be\s+)?(?:apply|payable|charged)|(?:be\s+)?waived|does not apply)",
                     after,
                     re.I,
                 )
@@ -124,6 +126,7 @@ def analyze_pages(pages, filename, model) -> AnalysisResult:
             clause.explanation = TAXONOMY["no_risk"]["explanation_template"]
             clause.recommendation = TAXONOMY["no_risk"]["recommendation_template"]
             if predictions and clause.model_label != "no_risk":
+                clause.detection_method = "uncertain"
                 clause.explanation = "No rule evidence; model prediction is below the configured threshold. Review this uncertain clause."
     scoring = score_clauses(clauses)
     classification = classify_document("\n".join(p.text for p in pages))

@@ -1207,3 +1207,7 @@ dialog p {
     transition: none !important;
   }
 }
+
+/* Legal filenames may contain 200 characters without whitespace. */
+.page-heading > div { min-width: 0; }
+#analysis-title, #file-label { overflow-wrap: anywhere; min-width: 0; }

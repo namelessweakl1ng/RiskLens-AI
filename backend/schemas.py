@@ -48,7 +48,9 @@ class Clause(Contract):
     class_probabilities: dict[str, float] = Field(default_factory=dict)
     rule_matches: list[RuleMatch] = Field(default_factory=list)
     findings: list[Finding] = Field(default_factory=list)
-    detection_method: Literal["rule", "model", "hybrid", "safe"] = "safe"
+    detection_method: Literal[
+        "rule", "model", "hybrid", "safe", "uncertain", "legacy_unverified"
+    ] = "safe"
     severity: Literal["low", "medium", "high", "critical"] = "low"
     disagreement: bool = False
     explanation: str = ""
@@ -124,3 +126,4 @@ class AnalysisResult(Contract):
     recommended_actions: list[str]
     disclaimer: str = "RiskLens provides informational analysis, not legal, insurance, lending or investment advice."
     legacy_unverified: bool = False
+    legacy_overall_risk: str | None = None

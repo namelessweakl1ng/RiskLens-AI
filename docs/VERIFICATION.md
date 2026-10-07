@@ -12,7 +12,7 @@ is explicitly rule_only because no domain-trained artifact is available.
 | `PIP_CACHE_DIR=/workspace/review/pip-cache .venv/bin/python -m pip install 'torch==2.14.1+cpu' --index-url https://download.pytorch.org/whl/cpu` | Exit 0, CPU PyTorch installed with normal TLS verification |
 | `.venv/bin/python -m pip install -r requirements-dev.txt` | Exit 0; includes clean runtime requirements installation |
 | `.venv/bin/python -m pip check` | No broken requirements |
-| `.venv/bin/python -m pytest -q` | 56 passed, 0 failed; one upstream Starlette HTTPX deprecation warning |
+| `.venv/bin/python -m pytest -q` | 66 passed, 0 failed; one upstream Starlette HTTPX deprecation warning |
 | `.venv/bin/ruff check backend training_pipeline tests` | All checks passed |
 | `.venv/bin/ruff format --check backend training_pipeline tests` | 33 files already formatted |
 | `for file in frontend/js/*.js tests/browser.cjs; do node --check "$file" || exit 1; done` | All JavaScript syntax checks passed |
@@ -93,3 +93,24 @@ Rule-only behavior is verified; production-trained hybrid accuracy is unverified
 The upstream Starlette TestClient HTTPX deprecation warning is non-failing; it is
 reported rather than suppressed. On read-only HOME environments, set writable
 MPLCONFIGDIR/XDG_CACHE_HOME for repeated plotting to avoid temporary-cache warnings.
+
+## Independent review remediation
+
+Addressed all eight material findings with regression coverage: proposition-scoped
+negation, incomplete model weights, source-hash alias leakage, historical metadata
+and evidence display, cumulative PDF extraction budget, long mobile filenames,
+out-of-order history responses, and visibly uncertain model predictions. The new
+backend regressions failed before the fixes. Browser regressions use response
+interception and do not mutate stored documents.
+
+```bash
+RISKLENS_URL=http://127.0.0.1:8001 PYTHON=.venv/bin/python node tests/browser-regressions.cjs
+```
+
+PDF extraction stops as soon as the cumulative text budget is exceeded. One native
+page extraction can still expand before Python regains control; the local research
+server does not provide an OS-enforced per-page memory/time sandbox.
+
+The decision threshold remains a documented code constant (0.65). Evaluation
+validates supplied splits but does not yet enforce their identity against the
+artifact dataset hash; verify those hashes before calling a test set untouched.

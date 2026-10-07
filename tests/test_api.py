@@ -189,3 +189,56 @@ def test_future_database_schema_is_not_downgraded(tmp_path):
         Store(path)
     with sqlite3.connect(path) as db:
         assert db.execute("PRAGMA user_version").fetchone()[0] == 2
+
+
+def test_legacy_detail_and_history_preserve_known_metadata(tmp_path):
+    import sqlite3
+
+    from backend.database import Store
+
+    path = tmp_path / "historical.db"
+    store = Store(path)
+    with sqlite3.connect(path) as db:
+        db.execute(
+            "INSERT INTO documents(id,filename,created_at,document_type,risk_score,overall_risk) VALUES(1,'old.pdf','2026-01-01','loan',90,'High')"
+        )
+        db.execute(
+            "INSERT INTO clauses(document_id,clause_text,risk_label,severity) VALUES(1,'A penalty applies.','penalty_clause','high')"
+        )
+    result = store.get(1)
+    assert result.overall_risk == "High"
+    assert result.classification.document_type == "loan"
+    assert result.clauses[0].detection_method == "legacy_unverified"
+    assert store.list()[0]["overall_risk"] == "High"
+    assert store.dashboard()["risk_distribution"] == {"High": 1}
+
+
+def test_pdf_text_budget_stops_extraction_early(monkeypatch):
+    from backend.services import pdf
+
+    extracted = []
+
+    class FakePage:
+        def get_text(self, *args, **kwargs):
+            extracted.append(1)
+            return "a" * 600_000
+
+    class FakePDF:
+        needs_pass = False
+
+        def __len__(self):
+            return 3
+
+        def __iter__(self):
+            return iter([FakePage(), FakePage(), FakePage()])
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+    monkeypatch.setattr(pdf.pymupdf, "open", lambda **kwargs: FakePDF())
+    with pytest.raises(pdf.PDFError, match="text exceeds"):
+        pdf.extract_pages(b"%PDF-test")
+    assert len(extracted) == 2

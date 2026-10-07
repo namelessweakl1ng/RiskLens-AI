@@ -24,16 +24,18 @@ def extract_pages(data: bytes) -> list[Page]:
                 raise PDFError("Password-protected PDFs are not supported.")
             if not 0 < len(pdf) <= MAX_PAGES:
                 raise PDFError(f"PDF must contain between 1 and {MAX_PAGES} pages.")
-            pages = [
-                Page(page_number=i + 1, text=page.get_text("text", sort=True))
-                for i, page in enumerate(pdf)
-            ]
+            pages = []
+            characters = 0
+            for i, page in enumerate(pdf):
+                text = page.get_text("text", sort=True)
+                characters += len(text)
+                if characters > MAX_TEXT:
+                    raise PDFError("Extracted text exceeds the analysis limit.")
+                pages.append(Page(page_number=i + 1, text=text))
     except PDFError:
         raise
     except Exception as exc:
         raise PDFError("The PDF is corrupt or unreadable.") from exc
-    if sum(len(p.text) for p in pages) > MAX_TEXT:
-        raise PDFError("Extracted text exceeds the analysis limit.")
     if not any(p.text.strip() for p in pages):
         raise PDFError(
             "No readable text was found. This may be a scanned PDF; OCR is not available."

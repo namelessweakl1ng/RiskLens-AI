@@ -248,3 +248,7 @@ Only demonstrate hybrid inference after a domain-trained artifact passes review.
   inference runs in the local process.
 - RiskLens is informational analysis, **not legal, insurance, lending or investment
   advice**. Verify original terms with qualified professionals.
+
+Native PDF page extraction is not isolated in a memory/time-limited process. The
+cumulative text cap stops subsequent pages, but cannot bound expansion within a
+single native extraction. Use trusted documents in this local research application.

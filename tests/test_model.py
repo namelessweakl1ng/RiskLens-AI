@@ -84,3 +84,18 @@ def test_missing_model_directory_falls_back(tmp_path):
     from backend.services.fine_tuned_risk_model import RiskModel
 
     assert RiskModel(str(tmp_path / "missing")).status().mode == "rule_only"
+
+
+def test_incomplete_classifier_checkpoint_rejected(tiny_model):
+    from safetensors.torch import load_file, save_file
+
+    from backend.services.fine_tuned_risk_model import RiskModel
+
+    path = tiny_model / "model.safetensors"
+    weights = load_file(path)
+    for key in ["classifier.weight", "classifier.bias"]:
+        del weights[key]
+    save_file(weights, path, metadata={"format": "pt"})
+    model = RiskModel(str(tiny_model))
+    assert not model.status().model_loaded
+    assert model.status().mode == "rule_only"

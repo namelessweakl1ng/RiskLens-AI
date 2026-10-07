@@ -107,6 +107,7 @@ def duplicate_pairs(rows):
 
 def assert_no_leakage(splits):
     seen = {}
+    seen_hashes = {}
     all_rows = []
     owners = []
     for split in SPLITS:
@@ -115,6 +116,10 @@ def assert_no_leakage(splits):
             if document in seen and seen[document] != split:
                 raise ValueError(f"Source document leaks across splits: {document}")
             seen[document] = split
+            digest = row["sha256"]
+            if digest in seen_hashes and seen_hashes[digest] != split:
+                raise ValueError("Source document SHA256 leaks across splits")
+            seen_hashes[digest] = split
             all_rows.append(row)
             owners.append(split)
     for a, b in duplicate_pairs(all_rows):
@@ -139,6 +144,12 @@ def prepare_splits(rows, seed=42):
         if a != b:
             parent[max(a, b)] = min(a, b)
 
+    hash_owners = {}
+    for row in eligible:
+        digest = row["sha256"]
+        if digest in hash_owners:
+            union(row["source_document_id"], hash_owners[digest])
+        hash_owners[digest] = row["source_document_id"]
     duplicates = set()
     near_count = 0
     for a, b in duplicate_pairs(eligible):

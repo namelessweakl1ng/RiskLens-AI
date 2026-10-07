@@ -17,7 +17,8 @@ let selected = null,
   historyOffset = 0,
   historyTotal = 0,
   deletion = null,
-  requestToken = 0;
+  requestToken = 0,
+  historyToken = 0;
 function notice(message, kind = "") {
   const node = document.getElementById("notice");
   node.hidden = !message;
@@ -140,13 +141,16 @@ async function dashboard() {
   replace("recent-list", register(data.recent_documents));
 }
 async function history() {
-  const data = await api.documents(historyOffset);
+  const token = ++historyToken;
+  const offset = historyOffset;
+  const data = await api.documents(offset);
+  if (token !== historyToken || location.hash !== "#history") return;
   historyTotal = data.total;
   replace("history-list", register(data.documents));
   setText(
     "history-count",
     historyTotal
-      ? `${historyOffset + 1}–${Math.min(historyOffset + 20, historyTotal)} of ${historyTotal}`
+      ? `${offset + 1}–${Math.min(offset + 20, historyTotal)} of ${historyTotal}`
       : "0 documents",
   );
   document.getElementById("history-previous").disabled = historyOffset === 0;

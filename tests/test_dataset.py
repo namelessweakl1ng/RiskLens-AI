@@ -201,3 +201,25 @@ def test_source_identity_cannot_hide_conflicting_hashes():
     second["sha256"] = "f" * 64
     with pytest.raises(ValueError):
         validate_rows([first, second])
+
+
+def test_source_hash_aliases_cannot_leak():
+    from training_pipeline.preprocessing.prepare import assert_no_leakage, prepare_splits
+
+    first = row("The borrower repays principal on the listed dates.", "original")
+    second = row("The bank provides electronic statements each month.", "reimport")
+    second["sha256"] = first["sha256"]
+    with pytest.raises(ValueError):
+        assert_no_leakage({"train": [first], "validation": [second], "test": []})
+    result = prepare_splits(
+        [
+            first,
+            second,
+            row("Insurance covers the specified hospital treatment.", "other"),
+            row("The tenant gives notice before vacating the premises.", "third"),
+        ]
+    )
+    owners = {
+        r["source_document_id"]: key for key in ["train", "validation", "test"] for r in result[key]
+    }
+    assert owners["original"] == owners["reimport"]

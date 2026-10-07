@@ -120,12 +120,17 @@ class Store:
                 severity = "low"
             clauses.append(
                 Clause(
-                    clause_id=i,
+                    clause_id=item.get("clause_number") or i,
                     page_number=None,
                     text=item.get("clause_text") or "",
                     predicted_label=label,
                     severity=severity,
-                    explanation="Historical analysis: evidence and confidence have not been verified. Reanalyze the original PDF.",
+                    detection_method="legacy_unverified",
+                    explanation="Historical, unverified: "
+                    + (
+                        item.get("explanation")
+                        or "Evidence and confidence have not been verified. Reanalyze the original PDF."
+                    ),
                     recommendation="Reanalyze the original PDF with the current engine.",
                 )
             )
@@ -134,7 +139,10 @@ class Store:
             document_id=row["id"],
             filename=row["filename"],
             created_at=row["created_at"],
-            classification=DocumentClassification(),
+            classification=DocumentClassification(
+                document_type=Store._legacy_type(row.get("document_type")),
+                method="legacy_unverified",
+            ),
             page_count=0,
             text_page_count=0,
             clause_count=len(clauses),
@@ -144,7 +152,8 @@ class Store:
             ),
             mode="legacy_unverified",
             risk_score=score,
-            overall_risk=severity_for_score(score),
+            overall_risk=Store._legacy_level(row.get("overall_risk"), score),
+            legacy_overall_risk=row.get("overall_risk"),
             scoring=ScoreBreakdown(formula_version="legacy_unverified", score=score),
             severity_distribution=dict(Counter(c.severity for c in clauses)),
             category_distribution=dict(
@@ -167,6 +176,27 @@ class Store:
             legacy_unverified=True,
         )
 
+    @staticmethod
+    def _legacy_type(value):
+        value = (value or "unknown").lower().replace(" agreement", "").replace(" ", "_")
+        return (
+            value
+            if value
+            in {"loan", "credit_card", "insurance", "investment", "lease", "other_financial"}
+            else "unknown"
+        )
+
+    @staticmethod
+    def _legacy_level(value, score):
+        normalized = {
+            "low": "Low",
+            "medium": "Moderate",
+            "moderate": "Moderate",
+            "high": "High",
+            "critical": "Critical",
+        }
+        return normalized.get((value or "").lower(), severity_for_score(score))
+
     def list(self, limit=100, offset=0):
         with self.connect() as db:
             rows = db.execute(
@@ -180,7 +210,9 @@ class Store:
                     created_at=r["created_at"],
                     document_type=r["document_type"] or "unknown",
                     risk_score=r["risk_score"] or 0,
-                    overall_risk=severity_for_score(r["risk_score"] or 0),
+                    overall_risk=self._legacy_level(r["overall_risk"], r["risk_score"] or 0)
+                    if r["legacy"]
+                    else severity_for_score(r["risk_score"] or 0),
                     legacy_unverified=bool(r["legacy"]),
                 )
                 for r in rows
@@ -188,13 +220,22 @@ class Store:
 
     def dashboard(self):
         with self.connect() as db:
-            rows = db.execute("SELECT risk_score,document_type FROM documents").fetchall()
+            rows = db.execute(
+                "SELECT risk_score,document_type,overall_risk,canonical_json FROM documents"
+            ).fetchall()
         scores = [float(r["risk_score"] or 0) for r in rows]
         return {
             "total_documents": len(rows),
             "average_risk": round(sum(scores) / len(scores), 1) if scores else 0,
             "high_risk_documents": sum(score >= 60 for score in scores),
-            "risk_distribution": dict(Counter(severity_for_score(score) for score in scores)),
+            "risk_distribution": dict(
+                Counter(
+                    self._legacy_level(r["overall_risk"], r["risk_score"] or 0)
+                    if not r["canonical_json"]
+                    else severity_for_score(r["risk_score"] or 0)
+                    for r in rows
+                )
+            ),
             "document_type_distribution": dict(
                 Counter(r["document_type"] or "unknown" for r in rows)
             ),
