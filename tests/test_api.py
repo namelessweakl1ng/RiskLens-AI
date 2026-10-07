@@ -83,6 +83,16 @@ def test_upload_limit(tmp_path):
         assert upload(client).status_code == 413
 
 
+def test_upload_accepts_exact_limit_and_rejects_one_byte_over(tmp_path):
+    from backend.main import create_app
+
+    content = pdf_bytes()
+    with TestClient(create_app(tmp_path / "exact.db", max_upload_bytes=len(content))) as exact:
+        assert upload(exact, content).status_code == 200
+    with TestClient(create_app(tmp_path / "over.db", max_upload_bytes=len(content) - 1)) as over:
+        assert upload(over, content).status_code == 413
+
+
 def test_filename_is_sanitized(client):
     result = upload(client, filename="../../private\\loan.pdf").json()
     assert result["filename"] == "loan.pdf"
@@ -210,7 +220,40 @@ def test_legacy_detail_and_history_preserve_known_metadata(tmp_path):
     assert result.classification.document_type == "loan"
     assert result.clauses[0].detection_method == "legacy_unverified"
     assert store.list()[0]["overall_risk"] == "High"
-    assert store.dashboard()["risk_distribution"] == {"High": 1}
+    dashboard = store.dashboard()
+    assert dashboard["risk_distribution"] == {}
+    assert dashboard["verified_documents"] == 0
+    assert dashboard["legacy_unverified_documents"] == 1
+
+
+def test_dashboard_excludes_legacy_from_canonical_aggregates(tmp_path):
+    from backend.main import create_app
+    from backend.services.fine_tuned_risk_model import RiskModel
+
+    path = tmp_path / "mixed.db"
+    with TestClient(create_app(path, RiskModel(""))) as mixed:
+        canonical = upload(mixed).json()
+        with sqlite3.connect(path) as db:
+            db.execute(
+                "INSERT INTO documents(filename,created_at,document_type,risk_score,overall_risk) VALUES('legacy.pdf','2020-01-01','loan',100,'High')"
+            )
+        dashboard = mixed.get("/api/dashboard").json()
+        assert dashboard["total_documents"] == 2
+        assert dashboard["verified_documents"] == 1
+        assert dashboard["legacy_unverified_documents"] == 1
+        assert dashboard["average_risk"] == canonical["risk_score"]
+        assert dashboard["high_risk_documents"] == int(canonical["risk_score"] >= 60)
+        assert sum(dashboard["risk_distribution"].values()) == 1
+        assert len(mixed.get("/api/documents").json()["documents"]) == 2
+
+
+def test_segmentation_stops_at_clause_limit_without_materializing_all_boundaries():
+    from backend.schemas import Page
+    from backend.services import pdf
+
+    text = ";".join(f"clause number {index}" for index in range(pdf.MAX_CLAUSES + 1000))
+    with pytest.raises(pdf.PDFError, match="too many clauses"):
+        pdf.segment_pages([Page(page_number=1, text=text)])
 
 
 def test_pdf_text_budget_stops_extraction_early(monkeypatch):

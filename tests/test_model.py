@@ -99,3 +99,25 @@ def test_incomplete_classifier_checkpoint_rejected(tiny_model):
     model = RiskModel(str(tiny_model))
     assert not model.status().model_loaded
     assert model.status().mode == "rule_only"
+
+
+def test_long_clause_uses_overlapping_windows_and_keeps_end_risk(tiny_model, monkeypatch):
+    from types import SimpleNamespace
+
+    import torch
+
+    from backend.services.fine_tuned_risk_model import RiskModel
+
+    model = RiskModel(str(tiny_model))
+    fee_id = model._tokenizer.convert_tokens_to_ids("fee")
+    risk_index = model.status().labels.index("hidden_charges")
+
+    def forward(input_ids, **kwargs):
+        logits = torch.zeros((input_ids.shape[0], len(model.status().labels)))
+        logits[:, model.status().labels.index("no_risk")] = 2
+        logits[input_ids.eq(fee_id).any(dim=1), risk_index] = 10
+        return SimpleNamespace(logits=logits)
+
+    monkeypatch.setattr(model._model, "forward", forward)
+    result = model.predict([("a " * 700) + "fee"])[0]
+    assert result["hidden_charges"] > 0.99

@@ -193,6 +193,67 @@ def test_review_uncertain_prediction_is_explicit():
     assert result.clauses[0].detection_method == "uncertain"
 
 
+def test_low_confidence_no_risk_is_uncertain():
+    from backend.taxonomy import LABELS
+
+    probabilities = {label: 0.065 for label in LABELS}
+    probabilities["no_risk"] = 0.415
+    clause = engine("The parties acknowledge the agreement.", probabilities).clauses[0]
+    assert clause.model_label == "no_risk"
+    assert clause.model_confidence == pytest.approx(0.415)
+    assert clause.detection_method == "uncertain"
+
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        ("No annual fee applies.", set()),
+        ("No annual fee applies, but late payment penalties may be charged.", {"penalty_clause"}),
+        ("There is no annual fee and late payment penalties apply.", {"penalty_clause"}),
+        ("No foreclosure or prepayment penalty shall apply.", set()),
+    ],
+)
+def test_negation_scope_across_propositions(text, expected):
+    assert {m.category for m in rule_matches_for_test(text)} == expected
+
+
+def rule_matches_for_test(text):
+    from backend.services.risk_analyzer import rule_matches
+
+    return rule_matches(text)
+
+
+def test_coverage_negation_does_not_suppress_earlier_exclusion():
+    matches = rule_matches_for_test("Coverage excludes floods but does not exclude fire.")
+    assert [match.category for match in matches].count("coverage_exclusion") == 1
+
+
+def test_confident_no_risk_and_empty_rules_count_as_agreement():
+    from backend.taxonomy import LABELS
+
+    probabilities = {label: 0.01 for label in LABELS}
+    probabilities["no_risk"] = 0.91
+    result = engine("The parties acknowledge the signed agreement.", probabilities)
+    assert result.health["model_rule_agreement"] == pytest.approx(1)
+
+
+def test_document_classifier_is_ambiguity_aware():
+    from backend.services.document_classifier import classify_document
+
+    assert (
+        classify_document("Borrower lender repayment under this loan agreement.").document_type
+        == "loan"
+    )
+    assert (
+        classify_document("Insurer coverage premium under this insurance policy.").document_type
+        == "insurance"
+    )
+    assert classify_document("General terms and signatures.").document_type == "unknown"
+    tied = classify_document("The borrower asks the insurer to sign.")
+    assert tied.document_type == "unknown"
+    assert tied.candidate_types == ["insurance", "loan"]
+
+
 def test_without_notice_does_not_negate_repossession():
     result = engine("Without prior notice, the lender may repossess the collateral.")
     assert {f.category for c in result.clauses for f in c.findings} >= {

@@ -13,6 +13,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from backend.taxonomy import canonical_label
+from training_pipeline.ingestion.public_sources import load_source_registry
 
 ANNOTATIONS = {
     "expert_reviewed",
@@ -39,6 +40,7 @@ def normalize_text(text):
 def validate_rows(rows):
     validated = []
     source_hashes = {}
+    source_registry = load_source_registry()
     for index, original in enumerate(rows, 1):
         item = dict(original)
         item["text"] = normalize_text(str(item.get("text", "")))
@@ -76,6 +78,14 @@ def validate_rows(rows):
             url = urlparse(item.get("source_url") or "")
             if url.scheme != "https" or not url.hostname or url.username or url.password:
                 raise ValueError(f"Row {index}: public source requires an HTTPS URL")
+            approved = source_registry.get(item.get("source_id"))
+            if (
+                not approved
+                or url.hostname not in approved["hostnames"]
+                or approved["source_type"] != "public_real"
+                or item["source_organization"] != approved["source_organization"]
+            ):
+                raise ValueError(f"Row {index}: public source does not match approved manifest")
         if not isinstance(item.get("is_hard_negative"), bool):
             raise ValueError(f"Row {index}: is_hard_negative must be boolean")
         item["text_sha256"] = hashlib.sha256(item["text"].lower().encode()).hexdigest()

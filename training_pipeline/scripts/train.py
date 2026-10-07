@@ -13,6 +13,16 @@ from training_pipeline.preprocessing.prepare import assert_no_leakage, read_json
 MINIMUM = {"train": 100, "validation": 15, "test": 15}
 
 
+def dataset_identity(folder):
+    """Return a split-aware version and the individual source-file hashes."""
+    folder = Path(folder)
+    split_hashes = {
+        key: hashlib.sha256((folder / f"{key}.jsonl").read_bytes()).hexdigest() for key in MINIMUM
+    }
+    canonical = json.dumps(split_hashes, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(canonical).hexdigest(), split_hashes
+
+
 def validate_training_data(splits):
     for key in MINIMUM:
         splits[key] = validate_rows(splits[key])
@@ -150,14 +160,13 @@ def main():
         **{tokenizer_key: tokenizer},
     )
     trainer.train()
-    dataset_hash = hashlib.sha256(
-        b"".join((folder / f"{key}.jsonl").read_bytes() for key in MINIMUM)
-    ).hexdigest()
+    dataset_hash, split_hashes = dataset_identity(folder)
     metadata = {
         "task": "contract_risk",
         "base_model": args.base_model,
         "version": "risklens-" + dataset_hash[:12],
         "dataset_version": dataset_hash,
+        "split_hashes": split_hashes,
         "labels": LABELS,
         "training_config": vars(args),
         "split_counts": {key: len(rows) for key, rows in splits.items()},

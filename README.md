@@ -157,7 +157,10 @@ python -m training_pipeline.scripts.evaluate --model training_pipeline/artifacts
 Normalization and duplicate clustering happen **before source-document-grouped**
 70/15/15 target splits. Cross-split source/near-duplicate leakage fails validation.
 Evaluation data is never oversampled. The trainer fails clearly when eligible
-class counts are insufficient or synthetic data dominates evaluation.
+class counts are insufficient or synthetic data dominates evaluation. Training
+metadata records a split-aware dataset version plus individual SHA256 hashes for
+train, validation and test, so moving identical bytes between splits changes the
+artifact identity.
 
 FinBERT's head is reinitialized for the domain taxonomy. Training uses class
 weights, deterministic seeds, early stopping, validation selection, linear LR
@@ -175,7 +178,7 @@ large downloaded corpora are added to normal Git history.
 | `GET /api/system/taxonomy` | Authoritative display names and evidence policy |
 | `POST /api/analyze` | Multipart PDF → canonical `AnalysisResult` |
 | `POST /api/review` | Retained upload alias |
-| `GET /api/dashboard` | Actual aggregate statistics and recent analyses |
+| `GET /api/dashboard` | Verified/current aggregate statistics, separate legacy count and recent history |
 | `GET /api/documents?limit=20&offset=0` | Paginated history |
 | `GET /api/documents/{id}` | Full stored canonical analysis |
 | `GET /api/dashboard/documents/{id}` | Retained detail alias |
@@ -236,7 +239,9 @@ Only demonstrate hybrid inference after a domain-trained artifact passes review.
   requires adequately labeled real documents and permitted model-download access.
 - Rules and family classification are bounded heuristics. Complex negation,
   cross-clause obligations, tables, reading order and jurisdiction can need expert
-  review. A 512-token classifier truncates long clauses; inspect source text.
+  review. Model inference divides long clauses into overlapping context windows
+  and keeps the complete probability distribution from the window with the
+  strongest material-risk signal; inspect source text for cross-window meaning.
 - OCR is not provided. Image-only pages reduce extraction coverage; text-bearing
   page percentage does not prove extraction fidelity.
 - This is a **local, unauthenticated research application**, not a multitenant

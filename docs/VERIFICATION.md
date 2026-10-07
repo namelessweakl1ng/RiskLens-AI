@@ -1,6 +1,6 @@
 # Verification evidence
 
-Verified in the cloud development environment on 2026-10-07. These are functional
+Verified in the cloud development environment on 2026-10-08. These are functional
 and engineering checks, **not model benchmark metrics**. The app's current mode
 is explicitly rule_only because no domain-trained artifact is available.
 
@@ -12,13 +12,14 @@ is explicitly rule_only because no domain-trained artifact is available.
 | `PIP_CACHE_DIR=/workspace/review/pip-cache .venv/bin/python -m pip install 'torch==2.14.1+cpu' --index-url https://download.pytorch.org/whl/cpu` | Exit 0, CPU PyTorch installed with normal TLS verification |
 | `.venv/bin/python -m pip install -r requirements-dev.txt` | Exit 0; includes clean runtime requirements installation |
 | `.venv/bin/python -m pip check` | No broken requirements |
-| `.venv/bin/python -m pytest -q` | 66 passed, 0 failed; one upstream Starlette HTTPX deprecation warning |
+| `.venv/bin/python -m pytest -q` | 83 passed, 0 failed; one upstream Starlette HTTPX deprecation warning |
 | `.venv/bin/ruff check backend training_pipeline tests` | All checks passed |
 | `.venv/bin/ruff format --check backend training_pipeline tests` | 33 files already formatted |
-| `for file in frontend/js/*.js tests/browser.cjs; do node --check "$file" || exit 1; done` | All JavaScript syntax checks passed |
+| `for file in frontend/js/*.js tests/*.cjs; do node --check "$file" || exit 1; done` | All JavaScript syntax checks passed |
 | `RISKLENS_DB_PATH=/workspace/review/browser-test.db python -m uvicorn backend.main:app --host 127.0.0.1 --port 8001` | Startup succeeded |
 | `GET /api/health`, `/api/system/model`, `/api/system/taxonomy` | Online/database/frontend ready; explicit rule-only classifier status and ten-label taxonomy |
 | `RISKLENS_URL=http://127.0.0.1:8001 PYTHON=.venv/bin/python BROWSER_ARTIFACTS=/workspace/review/browser-final node tests/browser.cjs` | Browser acceptance passed; real Chromium, four responsive widths |
+| `RISKLENS_URL=http://127.0.0.1:8001 PYTHON=.venv/bin/python node tests/browser-regressions.cjs` | Long filename, visible uncertainty and delayed pagination regressions passed |
 | `python -m training_pipeline.ingestion.cuad --output /workspace/review/cuad-restored` | Pinned archive/checksum verified; three JSON files restored byte-identical to prototype copies |
 | `python -m training_pipeline.annotation.legacy --output /workspace/review/legacy-quarantine` | 2,857 weak labels / 60 filenames; eligible ground truth zero |
 | `python -m training_pipeline.preprocessing.prepare --input training_pipeline/data/fixtures/hard_negatives.jsonl --output /workspace/review/synthetic-split` | Deterministic synthetic challenge split/report generated for guard validation only |
@@ -63,6 +64,10 @@ excerpts, so the system correctly did **not invent findings**. SHA256 matched,
 stored retrieval was exactly equal to the response, and deletion succeeded.
 This is a real-public-language functional check, not a labeled accuracy example.
 Separate synthetic challenge PDFs exercised actual risky/safe rule behavior.
+An exact automatic-renewal excerpt from the checksum-verified CUAD test set was
+also rendered in memory as a one-page PDF. The live API returned page-linked
+`automatic_renewal` rule evidence, score 35.4 / Moderate, explanation and review
+recommendation in explicit rule_only mode; persistence/retrieval/deletion passed.
 
 ## Model boundary
 
@@ -114,3 +119,18 @@ server does not provide an OS-enforced per-page memory/time sandbox.
 The decision threshold remains a documented code constant (0.65). Evaluation
 validates supplied splits but does not yet enforce their identity against the
 artifact dataset hash; verify those hashes before calling a test set untouched.
+
+## PR review follow-up
+
+All seven open Major CodeAnt threads were reproduced and addressed: canonical
+dashboard statistics exclude legacy scores; long clauses use overlapping model
+windows; clause segmentation streams regex matches; uploads use the framework's
+disk-backed spool with incremental SHA256; negation ends at separate conjunction
+propositions; low-confidence `no_risk` is uncertain; and dataset identity includes
+split boundaries. Additional requested checks added ambiguity-aware document
+classification, manifest-backed public provenance, a backend rule/model agreement
+metric, immutable async deletion targets, byte-reproducible synthetic fixtures and
+automatic weak-label output-directory creation. Regression tests cover each case.
+
+The unchanged honesty boundary remains: zero eligible verified real RiskLens
+training clauses, no trained domain classifier and no genuine model metrics.

@@ -41,6 +41,10 @@ const labels = {
     "Classification strength",
     "Matched winning-family signals / all matched signals; not a probability",
   ],
+  model_rule_agreement: [
+    "Rule/model agreement",
+    "Confident material predictions supported by matching rules, or confident no-risk predictions with no material rule evidence",
+  ],
 };
 function fact(name, value) {
   return el("div", {}, el("small", {}, name), el("strong", {}, value));
@@ -55,12 +59,17 @@ function intelligence(name, value) {
 }
 export function renderAnalysis(result) {
   current = result;
+  const candidates = result.classification.candidate_types || [];
+  const documentType =
+    result.classification.document_type === "unknown" && candidates.length
+      ? `Unknown — candidates: ${candidates.map(title).join(" / ")}`
+      : title(result.classification.document_type);
   document.getElementById("analysis-empty").hidden = true;
   document.getElementById("analysis-content").hidden = false;
   setText("analysis-title", result.filename);
   setText(
     "analysis-subtitle",
-    `${title(result.classification.document_type)} · ${result.clause_count} clauses · ${result.page_count || "Unknown"} pages · ${date(result.created_at)}`,
+    `${documentType} · ${result.clause_count} clauses · ${result.page_count || "Unknown"} pages · ${date(result.created_at)}`,
   );
   const status = result.model_status;
   replace(
@@ -90,7 +99,7 @@ export function renderAnalysis(result) {
           "Classification strength",
           percent(result.classification.classification_strength),
         ),
-        fact("Document type", title(result.classification.document_type)),
+        fact("Document type", documentType),
         fact(
           "Material clauses",
           result.clauses.filter((c) => c.findings.length || (result.legacy_unverified && c.predicted_label !== "no_risk")).length,
@@ -210,9 +219,6 @@ export function renderAnalysis(result) {
     ),
   );
   const inferred = result.clauses.filter((c) => c.model_confidence !== null);
-  const agreed = inferred.filter((c) =>
-    c.findings.some((f) => f.detection_method === "hybrid"),
-  ).length;
   const top = inferred.reduce(
     (best, c) =>
       !best || c.model_confidence > best.model_confidence ? c : best,
@@ -235,9 +241,9 @@ export function renderAnalysis(result) {
     ),
     intelligence(
       "Rule/model agreement",
-      inferred.length
-        ? `${agreed} clauses (${percent(agreed / inferred.length)})`
-        : "Not applicable",
+      result.health.model_rule_agreement === null
+        ? "Not applicable"
+        : percent(result.health.model_rule_agreement),
     ),
     intelligence(
       "Classifier signal",

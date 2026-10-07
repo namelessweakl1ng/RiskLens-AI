@@ -19,11 +19,22 @@ def classify_document(text: str) -> DocumentClassification:
         kind: [word for word in words if re.search(r"\b" + re.escape(word) + r"\b", text, re.I)]
         for kind, words in SIGNALS.items()
     }
-    kind = max(evidence, key=lambda key: len(evidence[key]))
-    matches = evidence[kind]
-    if not matches:
+    top = max(map(len, evidence.values()))
+    if not top:
         return DocumentClassification()
+    candidates = [kind for kind, matches in evidence.items() if len(matches) == top]
     total = sum(len(v) for v in evidence.values())
+    if len(candidates) > 1:
+        return DocumentClassification(
+            classification_strength=round(top / total, 3),
+            evidence=sorted({word for kind in candidates for word in evidence[kind]}),
+            candidate_types=candidates,
+        )
+    kind = candidates[0]
+    matches = evidence[kind]
     return DocumentClassification(
-        document_type=kind, classification_strength=round(len(matches) / total, 3), evidence=matches
+        document_type=kind,
+        classification_strength=round(len(matches) / total, 3),
+        evidence=matches,
+        candidate_types=[kind],
     )

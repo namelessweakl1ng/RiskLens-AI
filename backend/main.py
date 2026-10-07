@@ -102,21 +102,27 @@ def create_app(db_path=None, model=None, max_upload_bytes=DEFAULT_UPLOAD_LIMIT) 
                 raise HTTPException(415, "Only PDF uploads are supported.")
             if (file.content_type or "").lower() not in {"application/pdf", "application/x-pdf"}:
                 raise HTTPException(415, "The upload MIME type must be application/pdf.")
-            chunks = []
             length = 0
+            digest = hashlib.sha256()
+            # Starlette already receives UploadFile into a SpooledTemporaryFile.
+            # Force it to disk before creating the parser's one bounded bytes value.
+            rollover = getattr(file.file, "rollover", None)
+            if rollover:
+                await run_in_threadpool(rollover)
             while chunk := await file.read(1024 * 1024):
                 length += len(chunk)
                 if length > max_upload_bytes:
                     raise HTTPException(
                         413, f"PDF exceeds the {max_upload_bytes} byte upload limit."
                     )
-                chunks.append(chunk)
-            data = b"".join(chunks)
+                digest.update(chunk)
+            await file.seek(0)
+            data = await file.read(max_upload_bytes + 1)
 
             def process():
                 pages = extract_pages(data)
                 result = analyze_pages(pages, filename, app.state.risk_model)
-                result.sha256 = hashlib.sha256(data).hexdigest()
+                result.sha256 = digest.hexdigest()
                 return app.state.store.save(result)
 
             try:

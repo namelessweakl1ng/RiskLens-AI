@@ -6,6 +6,9 @@ split scripts have been removed; their data is preserved under `data/legacy`.
 
 1. Collect authorized public PDFs using an explicit source manifest:
    `python -m training_pipeline.ingestion.public_sources --manifest sources.json --output training_pipeline/data/raw/collection`.
+   Every entry must reference a source ID in
+   `data/manifests/approved_sources.json`; extend that reviewed registry for a new
+   authority or public insurer.
 2. Annotate `candidates.jsonl`: set a taxonomy label, truthful annotation_method,
    and is_hard_negative. Never upgrade a rule output to human_reviewed.
 3. Prepare source-grouped splits:
@@ -22,6 +25,6 @@ No CUAD category is automatically treated as a RiskLens risk label.
 
 Generate supplementary challenge cases with
 `python -m training_pipeline.annotation.hard_negatives`. The committed 21 cases
-are explicitly synthetic fixtures (12 hard negatives), not a production training
+are byte-reproducible, explicitly synthetic fixtures (12 hard negatives), not a production training
 set or evaluation benchmark. See [DATASET](../docs/DATASET.md) and
 [MODEL](../docs/MODEL.md) for provenance, constraints and honest status.

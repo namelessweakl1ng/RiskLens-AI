@@ -113,29 +113,31 @@ async function dashboard() {
   replace(
     "portfolio-stats",
     stat(data.total_documents, "Analyzed documents"),
-    stat(data.average_risk.toFixed(1), "Average risk / 100"),
-    stat(data.high_risk_documents, "High / critical documents"),
+    stat(data.verified_documents, "Verified current analyses"),
+    stat(data.legacy_unverified_documents, "Historical / unverified"),
+    stat(data.average_risk.toFixed(1), "Verified average risk / 100"),
+    stat(data.high_risk_documents, "Verified high / critical"),
   );
   replace(
     "portfolio-chart",
     el("p", { class: "chart-heading" }, "RISK DISTRIBUTION"),
-    data.total_documents
+    data.verified_documents
       ? bars(data.risk_distribution)
       : el(
           "p",
           { class: "tiny" },
-          "No analyses yet — your statistics will appear after the first upload.",
+          "No verified analyses yet — historical records remain available but are excluded from current risk statistics.",
         ),
   );
   replace(
     "portfolio-types",
     el("p", { class: "chart-heading" }, "DOCUMENT FAMILIES"),
-    data.total_documents
+    data.verified_documents
       ? bars(data.document_type_distribution)
       : el(
           "p",
           { class: "tiny" },
-          "Nothing to classify until a document has been analyzed.",
+          "No verified document families to summarize.",
         ),
   );
   replace("recent-list", register(data.recent_documents));
@@ -289,12 +291,13 @@ document
   .getElementById("confirm-delete")
   .addEventListener("click", async () => {
     if (!deletion) return;
+    const target = deletion;
     const button = document.getElementById("confirm-delete");
     button.disabled = true;
     try {
-      await api.remove(deletion.document_id);
+      await api.remove(target.document_id);
       document.getElementById("delete-dialog").close();
-      if (lastAnalysis?.document_id === deletion.document_id) {
+      if (lastAnalysis?.document_id === target.document_id) {
         lastAnalysis = null;
         document.getElementById("analysis-empty").hidden = false;
         document.getElementById("analysis-content").hidden = true;
@@ -313,7 +316,7 @@ document
       notice(error.message, "error");
     } finally {
       button.disabled = false;
-      deletion = null;
+      if (deletion === target) deletion = null;
     }
   });
 window.addEventListener("hashchange", route);

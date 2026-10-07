@@ -24,7 +24,7 @@ def rule_matches(text: str) -> list[RuleMatch]:
         for number, pattern in enumerate(patterns):
             for match in re.finditer(pattern, text, re.I):
                 before = re.split(
-                    r"[.;!?]|,\s*(?:and\b)?|\b(?:but|however|yet)\b",
+                    r"[.;!?]|,|\b(?:and|but|however|yet|although|while)\b",
                     text[: match.start()],
                     flags=re.I,
                 )[-1][-90:]
@@ -125,9 +125,9 @@ def analyze_pages(pages, filename, model) -> AnalysisResult:
         else:
             clause.explanation = TAXONOMY["no_risk"]["explanation_template"]
             clause.recommendation = TAXONOMY["no_risk"]["recommendation_template"]
-            if predictions and clause.model_label != "no_risk":
+            if predictions and clause.model_confidence < MODEL_THRESHOLD:
                 clause.detection_method = "uncertain"
-                clause.explanation = "No rule evidence; model prediction is below the configured threshold. Review this uncertain clause."
+                clause.explanation = "No rule evidence; the model's top prediction is below the configured threshold. Review this uncertain clause."
     scoring = score_clauses(clauses)
     classification = classify_document("\n".join(p.text for p in pages))
     counts = dict(Counter(c.severity for c in clauses))
@@ -136,6 +136,16 @@ def analyze_pages(pages, filename, model) -> AnalysisResult:
     count = len(clauses)
     risky = sum(bool(c.findings) for c in clauses)
     findings = [f for c in clauses for f in c.findings]
+    confident_model_clauses = [
+        c
+        for c in clauses
+        if c.model_confidence is not None and c.model_confidence >= MODEL_THRESHOLD
+    ]
+    agreements = sum(
+        (c.model_label == "no_risk" and not c.rule_matches)
+        or any(m.category == c.model_label for m in c.rule_matches)
+        for c in confident_model_clauses
+    )
     actions = list(
         dict.fromkeys(
             f.recommendation
@@ -173,6 +183,9 @@ def analyze_pages(pages, filename, model) -> AnalysisResult:
             "safe_clause_ratio": (count - risky) / count,
             "extraction_quality": text_pages / len(pages),
             "classification_strength": classification.classification_strength,
+            "model_rule_agreement": (
+                agreements / len(confident_model_clauses) if confident_model_clauses else None
+            ),
         },
         executive_summary=summary,
         recommended_actions=actions,

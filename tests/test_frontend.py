@@ -40,3 +40,10 @@ def test_dashboard_has_evidence_filters_and_accessible_upload():
         'id="history-view"',
     ]:
         assert marker in html
+
+
+def test_delete_flow_captures_immutable_target_before_await():
+    source = Path("frontend/js/app.js").read_text()
+    assert "const target = deletion;" in source
+    assert "await api.remove(target.document_id);" in source
+    assert "lastAnalysis?.document_id === target.document_id" in source

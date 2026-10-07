@@ -80,15 +80,28 @@ class RiskModel:
         import torch
 
         output = []
+        configured = getattr(self._model.config, "max_position_embeddings", 512)
+        tokenizer_limit = getattr(self._tokenizer, "model_max_length", configured)
+        window = min(configured, tokenizer_limit if tokenizer_limit < 100_000 else configured, 512)
         with self._lock, torch.inference_mode():
-            for start in range(0, len(texts), 16):
+            for text in texts:
                 inputs = self._tokenizer(
-                    texts[start : start + 16],
+                    text,
                     truncation=True,
-                    max_length=512,
+                    max_length=window,
+                    stride=min(96, window // 4),
+                    return_overflowing_tokens=True,
                     padding=True,
                     return_tensors="pt",
                 ).to(self._status.device)
-                probabilities = self._model(**inputs).logits.softmax(dim=-1).cpu().tolist()
-                output.extend(dict(zip(self._status.labels, row)) for row in probabilities)
+                inputs.pop("overflow_to_sample_mapping", None)
+                rows = []
+                for start in range(0, inputs["input_ids"].shape[0], 16):
+                    batch = {key: value[start : start + 16] for key, value in inputs.items()}
+                    rows.extend(self._model(**batch).logits.softmax(dim=-1).cpu().tolist())
+                material = [i for i, label in enumerate(self._status.labels) if label != "no_risk"]
+                # Preserve the complete distribution from the window with the
+                # strongest material signal; ties choose the earliest window.
+                strongest = max(rows, key=lambda row: max(row[i] for i in material))
+                output.append(dict(zip(self._status.labels, strongest)))
         return output

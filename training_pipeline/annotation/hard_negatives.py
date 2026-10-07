@@ -2,7 +2,6 @@
 
 import hashlib
 import json
-from datetime import datetime, timezone
 from pathlib import Path
 
 EXAMPLES = [
@@ -36,10 +35,10 @@ EXAMPLES = [
     ("The insurer may modify the premium at its sole discretion.", "unilateral_change", False),
     ("The customer accepts unlimited liability for all consequential losses.", "other_risk", False),
 ]
+FIXTURE_TIMESTAMP = "2026-01-01T00:00:00+00:00"
 
 
-def main():
-    now = datetime.now(timezone.utc).isoformat()
+def build_rows():
     rows = []
     for text, label, negative in EXAMPLES:
         digest = hashlib.sha256(text.encode()).hexdigest()
@@ -53,14 +52,24 @@ def main():
                 source_document_id="synthetic-" + digest,
                 source_organization="RiskLens project synthetic fixture generator",
                 source_url=None,
-                retrieved_at=now,
+                retrieved_at=FIXTURE_TIMESTAMP,
                 sha256=digest,
                 is_hard_negative=negative,
             )
         )
-    output = Path("training_pipeline/data/fixtures/hard_negatives.jsonl")
+    return rows
+
+
+def write_fixtures(output):
+    rows = build_rows()
+    output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    return rows
+
+
+def main():
+    rows = write_fixtures("training_pipeline/data/fixtures/hard_negatives.jsonl")
     print(
         f"Wrote {len(rows)} synthetic fixtures ({sum(r['is_hard_negative'] for r in rows)} hard negatives); not enough data for training."
     )

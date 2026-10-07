@@ -12,7 +12,12 @@ def row(text, document="a", label="no_risk", method="project_curated", source="p
         source_type=source,
         annotation_method=method,
         source_document_id=document,
-        source_organization="TEST FIXTURE ONLY",
+        source_id="cfpb_agreements" if source == "public_real" else None,
+        source_organization=(
+            "Consumer Financial Protection Bureau"
+            if source == "public_real"
+            else "TEST FIXTURE ONLY"
+        ),
         source_url="https://www.consumerfinance.gov/" if source == "public_real" else None,
         retrieved_at=datetime.now(timezone.utc).isoformat(),
         sha256=hashlib.sha256(document.encode()).hexdigest(),
@@ -165,13 +170,66 @@ def test_ingestion_rejects_untrusted_source_and_bad_checksums(tmp_path):
         validate_source(
             {
                 "url": "https://127.0.0.1/private",
-                "source_organization": "Local",
+                "source_id": "cfpb_agreements",
+                "source_type": "public_real",
+                "source_organization": "Consumer Financial Protection Bureau",
                 "agreement_family": "loan",
             }
         )
     with pytest.raises(ValueError):
         verify_checksum(b"test", "0" * 64)
     assert verify_checksum(b"test", hashlib.sha256(b"test").hexdigest())
+
+
+def test_public_provenance_requires_approved_manifest_source():
+    from training_pipeline.preprocessing.prepare import validate_rows
+
+    assert validate_rows([row("The stated repayment schedule applies.")])
+    untrusted = row("The stated repayment schedule applies.")
+    untrusted["source_url"] = "https://example.com/agreement.pdf"
+    with pytest.raises(ValueError, match="approved manifest"):
+        validate_rows([untrusted])
+    malformed = row("The stated repayment schedule applies.")
+    malformed["source_url"] = "not-a-url"
+    with pytest.raises(ValueError, match="HTTPS URL"):
+        validate_rows([malformed])
+    assert validate_rows(
+        [row("A synthetic statement.", source="synthetic", method="synthetic_curated")]
+    )
+
+
+def test_dataset_identity_is_split_aware(tmp_path):
+    from training_pipeline.scripts.train import dataset_identity
+
+    contents = {"train": "a\n", "validation": "b\n", "test": "c\n"}
+    for split, content in contents.items():
+        (tmp_path / f"{split}.jsonl").write_text(content)
+    first, hashes = dataset_identity(tmp_path)
+    assert set(hashes) == {"train", "validation", "test"}
+    (tmp_path / "train.jsonl").write_text(contents["test"])
+    (tmp_path / "test.jsonl").write_text(contents["train"])
+    second, _ = dataset_identity(tmp_path)
+    assert second != first
+
+
+def test_generated_fixtures_are_byte_reproducible(tmp_path):
+    from training_pipeline.annotation.hard_negatives import write_fixtures
+
+    first, second = tmp_path / "one.jsonl", tmp_path / "two.jsonl"
+    write_fixtures(first)
+    write_fixtures(second)
+    assert first.read_bytes() == second.read_bytes()
+
+
+def test_weak_label_cli_creates_output_parent(tmp_path, monkeypatch):
+    from training_pipeline.annotation import weak_label
+
+    source = tmp_path / "input.jsonl"
+    source.write_text('{"text":"The parties sign this agreement."}\n')
+    output = tmp_path / "new" / "nested" / "labels.jsonl"
+    monkeypatch.setattr("sys.argv", ["weak_label", "--input", str(source), "--output", str(output)])
+    weak_label.main()
+    assert output.exists()
 
 
 def test_chained_near_duplicates_share_group():

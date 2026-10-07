@@ -11,29 +11,34 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from backend.services.pdf import extract_pages, segment_pages
 
-OFFICIAL_HOSTS = {
-    "www.consumerfinance.gov",
-    "files.consumerfinance.gov",
-    "consumerfinance.gov",
-    "www.sec.gov",
-    "sec.gov",
-    "www.irdai.gov.in",
-    "irdai.gov.in",
-}
+SOURCE_REGISTRY = Path(__file__).parents[1] / "data" / "manifests" / "approved_sources.json"
 
 
-def validate_source(source, extra_hosts=()):
+def load_source_registry(path=SOURCE_REGISTRY):
+    entries = json.loads(Path(path).read_text())
+    return {entry["source_id"]: entry for entry in entries}
+
+
+def validate_source(source, registry=None):
+    registry = registry or load_source_registry()
+    approved = registry.get(source.get("source_id"))
+    if not approved:
+        raise ValueError("Source ID is not present in the approved source manifest")
     url = urlparse(source.get("url", ""))
     if (
         url.scheme != "https"
-        or url.hostname not in OFFICIAL_HOSTS | set(extra_hosts)
+        or url.hostname not in approved["hostnames"]
         or url.username
         or url.password
         or url.port not in (None, 443)
     ):
         raise ValueError("Source must use HTTPS on an explicitly approved authoritative hostname")
-    if not source.get("source_organization") or not source.get("agreement_family"):
-        raise ValueError("Source organization and document family are required")
+    if (
+        source.get("source_type") != approved["source_type"]
+        or source.get("source_organization") != approved["source_organization"]
+        or not source.get("agreement_family")
+    ):
+        raise ValueError("Source type, organization and document family must match the manifest")
     return source
 
 
@@ -44,19 +49,18 @@ def verify_checksum(content, expected):
 
 
 class ApprovedRedirects(HTTPRedirectHandler):
-    def __init__(self, hosts):
-        self.hosts = hosts
+    def __init__(self, source, registry):
+        self.source = source
+        self.registry = registry
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):
-        validate_source(
-            {"url": newurl, "source_organization": "redirect", "agreement_family": "redirect"},
-            self.hosts,
-        )
+        validate_source({**self.source, "url": newurl}, self.registry)
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
-def fetch_pdf(source, extra_hosts=()):
-    validate_source(source, extra_hosts)
+def fetch_pdf(source, registry=None):
+    registry = registry or load_source_registry()
+    validate_source(source, registry)
     agent = (
         os.getenv("SEC_USER_AGENT")
         if urlparse(source["url"]).hostname in {"sec.gov", "www.sec.gov"}
@@ -66,7 +70,7 @@ def fetch_pdf(source, extra_hosts=()):
         raise ValueError(
             "SEC_USER_AGENT must identify your organization and contact per SEC fair-access policy"
         )
-    opener = build_opener(ApprovedRedirects(set(extra_hosts)))
+    opener = build_opener(ApprovedRedirects(source, registry))
     with opener.open(Request(source["url"], headers={"User-Agent": agent}), timeout=30) as response:
         content = response.read(20 * 1024 * 1024 + 1)
         resolved = response.url
@@ -77,13 +81,14 @@ def fetch_pdf(source, extra_hosts=()):
     return content, resolved
 
 
-def ingest_manifest(manifest, output, extra_hosts=()):
+def ingest_manifest(manifest, output, registry_path=SOURCE_REGISTRY):
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     rows = []
     records = []
+    registry = load_source_registry(registry_path)
     for source in json.loads(Path(manifest).read_text()):
-        content, resolved = fetch_pdf(source, extra_hosts)
+        content, resolved = fetch_pdf(source, registry)
         digest = hashlib.sha256(content).hexdigest()
         retrieved = datetime.now(timezone.utc).isoformat()
         (output / f"{digest}.pdf").write_bytes(content)
@@ -94,6 +99,7 @@ def ingest_manifest(manifest, output, extra_hosts=()):
                     "label": None,
                     "agreement_family": source["agreement_family"],
                     "source_type": "public_real",
+                    "source_id": source["source_id"],
                     "annotation_method": None,
                     "source_document_id": digest,
                     "source_organization": source["source_organization"],
@@ -118,15 +124,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", required=True)
     parser.add_argument("--output", required=True)
-    parser.add_argument(
-        "--allow-host",
-        action="append",
-        default=[],
-        help="Exact authoritative insurer hostname, explicitly authorized by the caller",
-    )
+    parser.add_argument("--source-registry", default=str(SOURCE_REGISTRY))
     args = parser.parse_args()
     print(
-        f"Extracted {len(ingest_manifest(args.manifest, args.output, args.allow_host))} candidates requiring manual annotation."
+        f"Extracted {len(ingest_manifest(args.manifest, args.output, args.source_registry))} candidates requiring manual annotation."
     )
 
 

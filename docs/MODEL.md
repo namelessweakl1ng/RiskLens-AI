@@ -37,6 +37,10 @@ source split hashes, training arguments and counts in this metadata. Metadata
 is a contract, not a guarantee of acceptable accuracy: inspect evaluation and
 review errors before deploying. Remote custom Python code is never trusted.
 
+`dataset_version` hashes a canonical mapping of the train, validation and test
+file hashes; `split_hashes` retains each SHA256. Exchanging identical row bytes
+between splits therefore produces a different artifact identity.
+
 `GET /api/system/model` exposes actual availability, mode, name, base model,
 version, dataset_version, labels and device. Load failures are visible. Loaded
 classifiers return genuine softmax distributions; default accepted-label
@@ -45,6 +49,13 @@ Every analysis stores its own model status/version; historical views do not
 substitute a later classifier. Inference failures downgrade that analysis to
 explicit rule_only with an error. Below-threshold predictions remain visible as
 uncertain and do not dominate score.
+
+Long clauses are tokenized into overlapping windows at the model context limit
+with up to 96 tokens of overlap. Windows run in bounded batches of 16. RiskLens
+returns one distribution per original clause: the complete distribution from
+the earliest window with the strongest material-class probability. This avoids
+averaging away a strong risk signal near the end of a clause. It does not infer
+relationships that span separate windows.
 
 Training is blocked by the absence of eligible reviewed data. In this environment
 CFPB and huggingface.co HTTPS requests also returned proxy CONNECT 403; no API

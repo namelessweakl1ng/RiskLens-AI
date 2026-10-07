@@ -1,6 +1,7 @@
 """Bounded page extraction and traceable legal clause segmentation."""
 
 import re
+from itertools import chain
 
 import pymupdf
 
@@ -48,7 +49,7 @@ def segment_pages(pages: list[Page]) -> list[Clause]:
     boundary = re.compile(r";\s*|(?<=[.!?])\s+(?=[A-Z])|\n\s*\n|\n(?=\s*(?:\d+[.)]|[•●\-])\s)")
     for page in pages:
         start = 0
-        for match in [*boundary.finditer(page.text), None]:
+        for match in chain(boundary.finditer(page.text), (None,)):
             end = match.start() if match else len(page.text)
             raw = page.text[start:end]
             text = re.sub(r"\s+", " ", raw).strip()

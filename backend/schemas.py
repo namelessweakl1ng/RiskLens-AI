@@ -91,6 +91,7 @@ class DocumentClassification(Contract):
     ] = "unknown"
     classification_strength: float = Field(default=0, ge=0, le=1)
     evidence: list[str] = Field(default_factory=list)
+    candidate_types: list[str] = Field(default_factory=list)
     method: str = "rule"
 
 

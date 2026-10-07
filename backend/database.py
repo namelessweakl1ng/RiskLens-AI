@@ -169,6 +169,7 @@ class Store:
                     "safe_clause_ratio",
                     "extraction_quality",
                     "classification_strength",
+                    "model_rule_agreement",
                 ]
             },
             executive_summary="Historical analysis preserved. Its score, evidence and model provenance are unverified; reanalyze the original PDF.",
@@ -223,21 +224,19 @@ class Store:
             rows = db.execute(
                 "SELECT risk_score,document_type,overall_risk,canonical_json FROM documents"
             ).fetchall()
-        scores = [float(r["risk_score"] or 0) for r in rows]
+        verified = [r for r in rows if r["canonical_json"]]
+        scores = [float(r["risk_score"] or 0) for r in verified]
         return {
             "total_documents": len(rows),
+            "verified_documents": len(verified),
+            "legacy_unverified_documents": len(rows) - len(verified),
             "average_risk": round(sum(scores) / len(scores), 1) if scores else 0,
             "high_risk_documents": sum(score >= 60 for score in scores),
             "risk_distribution": dict(
-                Counter(
-                    self._legacy_level(r["overall_risk"], r["risk_score"] or 0)
-                    if not r["canonical_json"]
-                    else severity_for_score(r["risk_score"] or 0)
-                    for r in rows
-                )
+                Counter(severity_for_score(r["risk_score"] or 0) for r in verified)
             ),
             "document_type_distribution": dict(
-                Counter(r["document_type"] or "unknown" for r in rows)
+                Counter(r["document_type"] or "unknown" for r in verified)
             ),
             "recent_documents": self.list(limit=8),
         }

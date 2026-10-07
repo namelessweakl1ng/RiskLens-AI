@@ -25,7 +25,9 @@ def main():
                     "ground_truth_eligible": False,
                 }
             )
-    Path(args.output).write_text("".join(json.dumps(row) + "\n" for row in rows))
+    output = Path(args.output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text("".join(json.dumps(row) + "\n" for row in rows))
 
 
 if __name__ == "__main__":
