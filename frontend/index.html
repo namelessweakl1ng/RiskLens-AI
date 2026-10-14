@@ -13,7 +13,7 @@
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <aside class="sidebar">
+    <aside class="sidebar" id="workspace-navigation">
       <a href="#overview" class="brand" aria-label="RiskLens overview"
         ><span class="brand-mark">R<span>↗</span></span
         ><span
@@ -22,7 +22,7 @@
         ></a
       >
       <p class="eyebrow sidebar-label">WORKSPACE</p>
-      <nav aria-label="Workspace navigation">
+      <nav id="primary-navigation" aria-label="Workspace navigation">
         <a href="#overview" class="nav-link active" id="nav-overview"
           ><span aria-hidden="true">▦</span> Overview</a
         >
@@ -48,6 +48,7 @@
     </aside>
     <div class="workspace">
       <header class="topbar">
+        <button id="mobile-menu-button" class="mobile-menu-button" type="button" aria-label="Open workspace navigation" aria-controls="workspace-navigation" aria-expanded="false">☰</button>
         <span class="breadcrumb"
           >WORKSPACE <span>/</span>
           <strong id="page-label">Overview</strong></span
@@ -66,11 +67,10 @@
             <div>
               <p class="eyebrow">YOUR AGREEMENT WORKSPACE</p>
               <h1 id="overview-title">
-                Clarity before commitment<span class="accent">.</span>
+                Understand every agreement.<br />Before you commit<span class="accent">.</span>
               </h1>
               <p class="muted">
-                Turn complex terms into traceable risks and practical review
-                actions.
+                Analyze financial and insurance agreements, uncover important clauses, and make informed decisions with traceable evidence.
               </p>
             </div>
             <span class="section-number">01 / OVERVIEW</span>
@@ -97,6 +97,11 @@
                     accept="application/pdf,.pdf"
                     aria-describedby="upload-privacy"
                 /></label>
+                <div id="selected-file" class="selected-file" role="status" aria-live="polite" hidden>
+                  <span class="selected-file-icon" aria-hidden="true">PDF</span>
+                  <span class="selected-file-copy"><strong id="selected-file-name"></strong><small id="selected-file-size"></small></span>
+                  <button id="remove-file" class="remove-file" type="button">Remove</button>
+                </div>
                 <button
                   type="submit"
                   id="analyze-button"
