@@ -10,12 +10,28 @@ def test_html_uses_linked_assets_and_semantic_landmarks():
     assert 'type="module"' in html
 
 
-def test_all_rectangular_styles_are_square():
+def test_fintech_visual_tokens_and_accessibility_motion():
     css = Path("frontend/style.css").read_text()
-    radii = re.findall(r"border-radius\s*:\s*([^;]+)", css)
-    assert radii and all(value.strip() == "0" for value in radii)
+    assert "--bg: #f8faf9" in css.lower()
+    assert "--accent: #059669" in css.lower()
+    assert re.search(r"--radius-(?:card|control):\s*1[246]px", css)
     assert "prefers-reduced-motion" in css
     assert ":focus-visible" in css
+
+
+def test_mobile_navigation_and_file_preview_controls_are_accessible():
+    html = Path("frontend/index.html").read_text()
+    for marker in [
+        'id="mobile-menu-button"',
+        'aria-controls="workspace-navigation"',
+        'id="workspace-navigation"',
+        'id="selected-file"',
+        'id="remove-file"',
+    ]:
+        assert marker in html
+    source = Path("frontend/js/app.js").read_text()
+    assert 'addEventListener("click", toggleNavigation)' in source
+    assert 'addEventListener("click", clearSelectedFile)' in source
 
 
 def test_user_data_is_never_interpolated_as_html():

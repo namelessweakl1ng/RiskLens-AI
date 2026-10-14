@@ -1,13 +1,13 @@
 import { el, title } from "./utils.js";
 const colors = {
-  Low: "#60d7c4",
-  low: "#60d7c4",
-  medium: "#f1c66e",
-  Moderate: "#f1c66e",
-  High: "#ff8590",
-  high: "#ff8590",
-  critical: "#e4a2d1",
-  Critical: "#e4a2d1",
+  Low: "#059669",
+  low: "#059669",
+  medium: "#d97706",
+  Moderate: "#d97706",
+  High: "#c2410c",
+  high: "#c2410c",
+  critical: "#b42318",
+  Critical: "#b42318",
 };
 const NS = "http://www.w3.org/2000/svg";
 function svg(tag, attrs, ...children) {
@@ -31,7 +31,7 @@ export function bars(values, label = title) {
     Object.entries(values).map(([key, value]) => {
       const fill = el("div", {
         class: "bar-fill",
-        style: `width:${(value / total) * 100}%;background:${colors[key] || "#60d7c4"}`,
+        style: `width:${(value / total) * 100}%;background:${colors[key] || "#059669"}`,
       });
       return el(
         "div",
@@ -50,7 +50,7 @@ export function gauge(score, severity) {
     cy: 90,
     r: 70,
     fill: "none",
-    stroke: colors[severity] || "#60d7c4",
+    stroke: colors[severity] || "#059669",
     "stroke-width": 9,
     "stroke-dasharray": circumference,
     "stroke-dashoffset": circumference,
@@ -61,7 +61,7 @@ export function gauge(score, severity) {
       x: 90,
       y: 92,
       "text-anchor": "middle",
-      fill: "#e8eef4",
+      fill: "#111827",
       "font-size": 40,
       "font-weight": 500,
     },
@@ -80,7 +80,7 @@ export function gauge(score, severity) {
       cy: 90,
       r: 70,
       fill: "none",
-      stroke: "#253b45",
+      stroke: "#e5e7eb",
       "stroke-width": 9,
     }),
     arc,
@@ -90,7 +90,7 @@ export function gauge(score, severity) {
         x: 90,
         y: 116,
         "text-anchor": "middle",
-        fill: "#a3b4c3",
+        fill: "#64748b",
         "font-size": 10,
         "letter-spacing": 2,
       },

@@ -19,6 +19,24 @@ let selected = null,
   deletion = null,
   requestToken = 0,
   historyToken = 0;
+const sidebar = document.getElementById("workspace-navigation");
+const menuButton = document.getElementById("mobile-menu-button");
+function closeNavigation({ restoreFocus = false } = {}) {
+  sidebar.classList.remove("open");
+  menuButton.setAttribute("aria-expanded", "false");
+  menuButton.setAttribute("aria-label", "Open workspace navigation");
+  if (restoreFocus) menuButton.focus();
+}
+function toggleNavigation() {
+  const open = !sidebar.classList.contains("open");
+  sidebar.classList.toggle("open", open);
+  menuButton.setAttribute("aria-expanded", String(open));
+  menuButton.setAttribute(
+    "aria-label",
+    open ? "Close workspace navigation" : "Open workspace navigation",
+  );
+  if (open) sidebar.querySelector(".nav-link")?.focus();
+}
 function notice(message, kind = "") {
   const node = document.getElementById("notice");
   node.hidden = !message;
@@ -168,6 +186,7 @@ function show(view) {
     else link.removeAttribute("aria-current");
   }
   setText("page-label", title(view));
+  closeNavigation();
 }
 async function route() {
   const token = ++requestToken;
@@ -198,8 +217,45 @@ async function route() {
 }
 function select(file) {
   selected = file;
-  setText("file-label", file ? file.name : "Choose a PDF or drop it here");
+  const preview = document.getElementById("selected-file");
+  preview.hidden = !file;
+  if (file) {
+    setText("selected-file-name", file.name);
+    setText("selected-file-size", formatBytes(file.size));
+  }
+  notice("");
 }
+function formatBytes(size) {
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(2)} MB`;
+}
+function clearSelectedFile() {
+  selected = null;
+  document.getElementById("file-input").value = "";
+  document.getElementById("selected-file").hidden = true;
+  setText("selected-file-name", "");
+  setText("selected-file-size", "");
+  notice("");
+  document.getElementById("file-input").focus();
+}
+menuButton.addEventListener("click", toggleNavigation);
+document.getElementById("remove-file").addEventListener("click", clearSelectedFile);
+sidebar.addEventListener("click", (event) => {
+  if (event.target.closest(".nav-link")) closeNavigation();
+});
+document.addEventListener("click", (event) => {
+  if (
+    sidebar.classList.contains("open") &&
+    !sidebar.contains(event.target) &&
+    !menuButton.contains(event.target)
+  )
+    closeNavigation();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && sidebar.classList.contains("open"))
+    closeNavigation({ restoreFocus: true });
+});
 document
   .getElementById("file-input")
   .addEventListener("change", (event) => select(event.target.files[0] || null));

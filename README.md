@@ -65,6 +65,9 @@ in [VERIFICATION](docs/VERIFICATION.md). Keep TLS/checksum verification enabled.
 The backend serves the frontend at `/` and assets at `/static/`; there is no
 separate frontend build or framework. Use the server address in your own local
 browser. Empty workspaces show actual empty states, not demo statistics.
+The light/emerald visual system, responsive navigation, upload preview, reduced
+motion behavior, and browser verification steps are documented in
+[FRONTEND](docs/FRONTEND.md).
 
 ## Configuration
 
@@ -195,7 +198,7 @@ fintel.db data is not overwritten or deleted. See [ARCHITECTURE](docs/ARCHITECTU
 ```text
 backend/                 schemas, taxonomy, one database store and API
   services/              extraction, classifier, model loader, rules, scorer
-frontend/                semantic HTML and square-corner CSS
+frontend/                semantic HTML, design-token CSS and native JS modules
   js/                    API, dashboard, evidence, SVG charts, safe DOM utilities
 training_pipeline/
   ingestion/             authorized source/PDF and checksum-verified CUAD tools
